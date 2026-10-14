@@ -1,0 +1,23 @@
+@model AIImage
+@{
+    ViewData["Title"] = "AI Image Details";
+    ViewData["BodyClass"] = "page-form";
+}
+
+<section class="form-page" aria-labelledby="details-title">
+    <h1 id="details-title" class="form-heading">AI Image Details</h1>
+    <div class="form-container form-container--narrow">
+        <div class="detail-panel">
+            <h4 class="detail-panel-title">AIImage</h4>
+            <partial name="_ImageDetails" model="Model" />
+
+            <div class="detail-actions">
+                <a class="btn btn-success" asp-action="Edit" asp-route-id="@Model.Id">
+                    <i class="fa-solid fa-pen" aria-hidden="true"></i> Edit
+                </a>
+                <span class="detail-separator" aria-hidden="true">|</span>
+                <a class="back-link" href="@Url.ImageAnchor(Model.Id)">Back to List</a>
+            </div>
+        </div>
+    </div>
+</section>

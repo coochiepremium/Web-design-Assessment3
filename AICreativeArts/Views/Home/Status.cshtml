@@ -1,0 +1,21 @@
+@model StatusCodeViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["BodyClass"] = "page-message";
+}
+
+<section class="message-page" aria-labelledby="status-title">
+    <div class="message-card">
+        <p class="message-code" aria-hidden="true">@Model.StatusCode</p>
+        <h1 id="status-title" class="form-heading">@Model.Title</h1>
+        <p class="message-text">@Model.Message</p>
+        @if (!string.IsNullOrEmpty(Model.OriginalPath))
+        {
+            <p class="message-meta">Requested: <code>@Model.OriginalPath</code></p>
+        }
+        <div class="message-actions">
+            <a class="btn btn-warning" asp-area="" asp-controller="Home" asp-action="Index">Back to Home</a>
+            <a class="btn btn-outline-light" asp-area="" asp-controller="AIImages" asp-action="Index">Browse AI Images</a>
+        </div>
+    </div>
+</section>

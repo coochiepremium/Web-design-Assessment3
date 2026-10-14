@@ -1,0 +1,92 @@
+@model IEnumerable<AIImage>
+@{
+    ViewData["Title"] = "List of AI Images";
+    ViewData["BodyClass"] = "page-list";
+    var isAdmin = User.IsInRole(Roles.Admin);
+    var isSignedIn = User.Identity?.IsAuthenticated == true;
+}
+
+<section class="hero hero--list" aria-labelledby="list-title">
+    <h1 id="list-title" class="hero-title hero-title--stroked">List of AI Images</h1>
+    <partial name="_UploadCallToAction" />
+</section>
+
+@if (!Model.Any())
+{
+    <section class="message-page message-page--inline">
+        <div class="message-card">
+            <i class="fa-solid fa-images message-icon" aria-hidden="true"></i>
+            <h2 class="form-heading">The gallery is empty</h2>
+            <p class="message-text">No AI images have been uploaded yet. Be the first to share your creation!</p>
+        </div>
+    </section>
+}
+else
+{
+    <div class="image-list">
+        @foreach (var item in Model)
+        {
+            var anchor = SiteUrlExtensions.AnchorId(item.Id);
+            <article id="@anchor" class="image-row" aria-labelledby="@anchor-title">
+                <div class="image-media">
+                    @if (isAdmin)
+                    {
+                        <a class="image-media-link" asp-action="Details" asp-route-id="@item.Id" title="View details">
+                            <img class="image-photo" src="@Url.UploadedImage(item.Filename)" alt="@item.Prompt" loading="lazy"
+                                 data-fallback="@Url.Content("~/img/image-unavailable.jpg")" />
+                            <span class="visually-hidden">View details for this image</span>
+                        </a>
+                    }
+                    else
+                    {
+                        <img class="image-photo" src="@Url.UploadedImage(item.Filename)" alt="@item.Prompt" loading="lazy"
+                             data-fallback="@Url.Content("~/img/image-unavailable.jpg")" />
+                    }
+                </div>
+
+                <div class="image-content">
+                    <h3 id="@anchor-title" class="image-generator">@item.ImageGenerator</h3>
+                    <p class="image-prompt">@item.Prompt</p>
+                    <p class="image-meta">
+                        <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+                        <time datetime="@item.UploadDate.ToString("yyyy-MM-ddTHH:mm")">@item.UploadDate.ToString("d MMMM yyyy")</time>
+                    </p>
+
+                    @if (isSignedIn)
+                    {
+                        <div class="image-actions">
+                            <form class="like-form" asp-action="Like" asp-route-id="@item.Id" method="post">
+                                @if (item.canIncreaseLike)
+                                {
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fa-solid fa-heart" aria-hidden="true"></i> Like (@item.Like)
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-primary btn-sm" disabled
+                                            title="You liked this image. Log out and in again to like it again.">
+                                        <i class="fa-solid fa-check" aria-hidden="true"></i> Liked (@item.Like)
+                                    </button>
+                                }
+                            </form>
+                            @if (isAdmin)
+                            {
+                                <a class="btn btn-success btn-sm" asp-action="Edit" asp-route-id="@item.Id">
+                                    <i class="fa-solid fa-pen" aria-hidden="true"></i> Edit
+                                </a>
+                                <a class="btn btn-danger btn-sm" asp-action="Delete" asp-route-id="@item.Id">
+                                    <i class="fa-solid fa-trash" aria-hidden="true"></i> Delete
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="image-likes"><i class="fa-solid fa-heart" aria-hidden="true"></i> @item.Like @(item.Like == 1 ? "like" : "likes")</p>
+                    }
+                </div>
+            </article>
+        }
+    </div>
+}

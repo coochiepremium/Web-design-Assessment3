@@ -1,0 +1,1799 @@
+/* ==========================================================================
+   MuseAI - AI in Creative Arts
+   Every style for the site lives in this external stylesheet (no inline or
+   internal styles). Desktop values follow the assessment brief exactly;
+   media queries adapt them for tablets (576-767px) and phones (<576px).
+
+   Contents
+     1. Fonts            7. Feature blocks & tool tiles   13. Account pages
+     2. Design tokens    8. Upload gallery                14. Message pages
+     3. Base & layout    9. AI Images list                15. Prompt Lab
+     4. Navigation      10. Forms (Create/Edit)           16. Toasts
+     5. Footer          11. Details & Delete              17. Motion & reveal
+     6. Hero & headings 12. Contact page                  18. Responsive
+   ========================================================================== */
+
+/* 1. Fonts (self-hosted Google Fonts, SIL Open Font License) ------------- */
+
+@font-face {
+    font-family: 'Anton';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../lib/fonts/anton-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../lib/fonts/montserrat-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../lib/fonts/montserrat-latin-400-italic.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('../lib/fonts/montserrat-latin-500-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('../lib/fonts/montserrat-latin-600-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('../lib/fonts/montserrat-latin-700-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Lato';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../lib/fonts/lato-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Lato';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('../lib/fonts/lato-latin-700-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Oxygen';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../lib/fonts/oxygen-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Oxygen';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('../lib/fonts/oxygen-latin-700-normal.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Niconne';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../lib/fonts/niconne-latin-400-normal.woff2') format('woff2');
+}
+
+/* 2. Design tokens -------------------------------------------------------- */
+
+:root {
+    --gold: #f8bd08;
+    --gold-soft: #f8f6b0;
+    --ink: #000000;
+    --night: #050a18;
+    --night-panel: rgba(5, 10, 30, 0.78);
+    --plum: #3d0f2e;
+    --navy-card: rgba(0, 0, 102, 0.78);
+    --white-line: rgba(255, 255, 255, 0.6);
+    --font-display: 'Anton', sans-serif;
+    --font-body: 'Montserrat', sans-serif;
+    --font-text: 'Lato', sans-serif;
+    --hero-image: url('../img/backgrounds/hero-neural-brush.jpg');
+    --studio-image: url('../img/backgrounds/studio-bokeh.jpg');
+    --shade: linear-gradient(rgba(3, 6, 18, 0.35), rgba(3, 6, 18, 0.35));
+    --shade-strong: linear-gradient(rgba(3, 6, 18, 0.55), rgba(3, 6, 18, 0.55));
+}
+
+/* 3. Base & layout -------------------------------------------------------- */
+
+html {
+    scroll-behavior: smooth;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--night);
+    color: #ffffff;
+    font-family: var(--font-body);
+}
+
+/* Full-width layout: main stretches between the menu and footer with no gaps. */
+.site-main {
+    flex: 1 0 auto;
+    width: 100%;
+    outline: none;
+}
+
+a {
+    color: inherit;
+}
+
+img {
+    max-width: 100%;
+}
+
+.skip-link {
+    position: absolute;
+    top: 0;
+    left: -9999px;
+    z-index: 2000;
+    padding: 0.5rem 1rem;
+    background-color: var(--gold);
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.skip-link:focus {
+    left: 0;
+}
+
+:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 2px;
+}
+
+/* Fixed backgrounds that give the parallax scrolling effect. */
+.hero,
+.page-contact .site-main {
+    background-image: var(--shade), var(--hero-image);
+    background-attachment: fixed;
+    background-position: center;
+    background-size: cover;
+}
+
+.parallax-section,
+.page-form .site-main,
+.page-message .site-main,
+.page-list .site-main {
+    background-image: var(--shade), var(--studio-image);
+    background-attachment: fixed;
+    background-position: center;
+    background-size: cover;
+}
+
+.page-form .site-main,
+.page-message .site-main {
+    background-image: var(--shade-strong), var(--studio-image);
+}
+
+/* 4. Navigation ------------------------------------------------------------ */
+
+.site-navbar {
+    padding: 0.3rem 1rem;
+    background-color: var(--ink);
+    font-family: var(--font-body);
+}
+
+.site-navbar .navbar-brand {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.site-navbar .navbar-brand:hover,
+.site-navbar .navbar-brand:focus-visible {
+    color: var(--gold);
+}
+
+.site-navbar .nav-link {
+    padding: 0.35rem 0.6rem;
+    color: #ffffff;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.site-navbar .nav-link:hover,
+.site-navbar .nav-link:focus-visible,
+.site-navbar .nav-link.active {
+    color: var(--gold);
+}
+
+.navbar-account .btn-link {
+    border: 0;
+    text-decoration: none;
+}
+
+.logout-form {
+    margin: 0;
+}
+
+.role-badge {
+    margin-left: 0.3rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 1rem;
+    background-color: var(--gold);
+    color: var(--ink);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+/* 5. Footer ---------------------------------------------------------------- */
+
+.site-footer {
+    flex-shrink: 0;
+    padding: 0.7rem 1rem;
+    background-color: var(--ink);
+}
+
+.footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem 1.5rem;
+}
+
+.footer-links,
+.social-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.social-links {
+    gap: 0.5rem;
+}
+
+.footer-links a {
+    color: #ffffff;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover,
+.footer-links a:focus-visible {
+    color: var(--gold);
+}
+
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 3px;
+    color: #ffffff;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.social-icon:hover,
+.social-icon:focus-visible {
+    color: #ffffff;
+    filter: brightness(1.2);
+    transform: translateY(-2px);
+}
+
+.social-google {
+    background-color: #db4437;
+}
+
+.social-youtube {
+    background-color: #c4302b;
+}
+
+.social-twitter {
+    background-color: #1da1f2;
+}
+
+.social-facebook {
+    background-color: #3b5998;
+}
+
+.social-linkedin {
+    background-color: #0e76a8;
+}
+
+/* 6. Hero & headings ------------------------------------------------------- */
+
+.hero {
+    padding-bottom: 5vw;
+    text-align: center;
+}
+
+.hero--home {
+    min-height: 92vh;
+}
+
+/* Main heading (brief: Home page heading). Contact uses it without the stroke. */
+.hero-title {
+    margin: 0;
+    padding: 9vw 2vw 0vw 2vw;
+    background-image: linear-gradient(to right, brown, brown, yellow, white, yellow, brown, brown);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-family: 'Anton', sans-serif;
+    font-size: 7vw;
+    font-weight: 400;
+    line-height: 1.15;
+    text-align: center;
+}
+
+.hero-title--stroked {
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: brown;
+}
+
+.hero-text {
+    max-width: 62vw;
+    margin: 1.5vw auto 0;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2vw;
+    line-height: 1.5;
+    text-align: center;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.75);
+}
+
+.hero-source {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.hero-source:hover,
+.hero-source:focus-visible {
+    color: var(--gold);
+    text-decoration: underline;
+}
+
+.upload-cta {
+    margin: 0.5vw 0 0;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.2vw;
+    font-style: italic;
+    text-align: center;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.upload-cta a {
+    color: #d9d9d9;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.upload-cta a:hover,
+.upload-cta a:focus-visible {
+    color: var(--gold);
+    text-decoration: underline;
+}
+
+/* 7. Feature blocks & tool tiles ------------------------------------------ */
+
+.parallax-section {
+    padding: 2vw 0 1vw;
+}
+
+.feature-section {
+    display: flex;
+    align-items: center;
+    min-height: 90vh;
+    padding: 4vw 0;
+}
+
+.feature-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 2vw;
+    width: 86%;
+    margin: 0 auto;
+}
+
+.feature-row--tiles-first {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+}
+
+.feature-card {
+    padding: 1.2vw 1.6vw 1.6vw;
+    border: 1px solid var(--white-line);
+    border-radius: 6px;
+    background-color: rgba(0, 0, 20, 0.35);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+}
+
+.feature-title {
+    margin: 0 0 0.4vw;
+    color: #f8bd08;
+    font-family: 'Anton', sans-serif;
+    font-size: 4vw;
+    font-weight: 400;
+    line-height: 1.15;
+    text-shadow: 2px 2px 0px navy, 2px 2px 4px white;
+}
+
+.feature-text {
+    margin: 0;
+    color: white;
+    font-family: 'Lato', sans-serif;
+    font-size: 1.5vw;
+    line-height: 1.55;
+}
+
+.read-more {
+    display: inline-block;
+    padding: 0 0.35em;
+    border: 1px solid #ffffff;
+    border-radius: 3px;
+    color: #ffffff;
+    text-decoration: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.read-more:hover,
+.read-more:focus-visible {
+    background-color: var(--gold);
+    color: var(--ink);
+}
+
+.tool-tiles {
+    display: flex;
+    justify-content: center;
+    gap: 1.5vw;
+}
+
+/* Square block (brief): background colour, white Arial 1.2vw, 0.9 opacity on hover over 2s. */
+.tool-tile {
+    position: relative;
+    display: block;
+    flex: 0 1 18vw;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 4px;
+    background-color: var(--plum);
+    color: white;
+    font: normal 1.2vw arial, sans-serif;
+    text-decoration: none;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+    transition: 2s ease;
+}
+
+.tool-tile:hover {
+    opacity: 0.9;
+}
+
+.tool-tile-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.8s ease, transform 2s ease;
+}
+
+.tool-tile.is-hovered .tool-tile-image {
+    opacity: 0.18;
+    transform: scale(1.06);
+}
+
+/* Built by site.js from the tile's data-hover-text and data-hover-source. */
+.tool-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10%;
+    color: white;
+    line-height: 1.35;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+.tool-tile.is-hovered .tool-overlay {
+    opacity: 1;
+}
+
+.tool-overlay-source {
+    margin-top: 0.4em;
+}
+
+/* 8. Upload gallery (home page) ------------------------------------------- */
+
+.upload-section {
+    padding: 4vw 0 3vw;
+    text-align: center;
+}
+
+.upload-title {
+    margin: 0;
+    color: #f8bd08;
+    font-family: 'Anton', sans-serif;
+    font-size: 4vw;
+    font-weight: 400;
+    text-shadow: 2px 2px 0px navy, 2px 2px 4px white;
+}
+
+.upload-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 2vw;
+    margin: 0;
+    padding: 2.5vw 3vw 1vw;
+    list-style: none;
+}
+
+.upload-tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    padding: 0.5vw;
+    border-radius: 3px;
+    background-image: linear-gradient(to right, #8c8c8c, #f4f4f4 50%, #8c8c8c);
+    color: #1a1aa6;
+    font: normal 1.2vw arial, sans-serif;
+    text-decoration: none;
+    text-shadow: 1px 1px 0 #ffffff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.upload-tile-label {
+    position: relative;
+    z-index: 1;
+    transition: opacity 2s ease;
+}
+
+/* Image created by site.js; fades in over 2 seconds on mouse over. */
+.upload-tile-image {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 2s ease;
+}
+
+.upload-tile.show-image .upload-tile-image {
+    opacity: 1;
+}
+
+.upload-tile.show-image .upload-tile-label {
+    opacity: 0;
+}
+
+.gallery-notice,
+.gallery-more {
+    margin: 1.5vw 0 0;
+    font-family: var(--font-body);
+    font-size: 1.1vw;
+}
+
+.gallery-more a {
+    color: var(--gold);
+}
+
+/* 9. AI Images list ------------------------------------------------------- */
+
+.hero--list {
+    padding-bottom: 3vw;
+}
+
+.image-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.image-row {
+    display: grid;
+    grid-template-columns: 28% minmax(0, 1fr);
+    min-height: 16vw;
+    background-color: #ffffff;
+    scroll-margin-top: 0;
+}
+
+.image-row:nth-child(even) {
+    grid-template-columns: minmax(0, 1fr) 28%;
+}
+
+.image-row:nth-child(even) .image-media {
+    order: 2;
+}
+
+.image-media,
+.image-media-link {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    background-color: var(--ink);
+}
+
+.image-media-link {
+    flex: 1 1 auto;
+}
+
+.image-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.image-media-link:hover .image-photo,
+.image-media-link:focus-visible .image-photo {
+    transform: scale(1.04);
+}
+
+/* Copies added by site.js so the picture repeats across narrow screens. */
+.image-photo--repeat {
+    display: none;
+}
+
+.image-content {
+    padding: 1.6vw 2.5vw 2vw;
+    background: linear-gradient(to bottom, #ff9933, #ffe6cc, white, white);
+    color: var(--ink);
+}
+
+.image-row:nth-child(even) .image-content {
+    background: linear-gradient(to bottom, #3333ff, #ccccff, white, white);
+}
+
+.image-generator {
+    margin: 0;
+    padding-bottom: 20px;
+    color: navy;
+    font-family: "Oxygen", sans-serif;
+    font-size: 2vw;
+    font-weight: 400;
+    letter-spacing: 7px;
+    text-align: center;
+    text-shadow: 2px 2px 0px white, 2px 2px 4px navy;
+    text-transform: uppercase;
+}
+
+.image-prompt {
+    margin: 0 0 0.6vw;
+    color: black;
+    font-family: Arial, sans-serif;
+    font-size: 1vw;
+    line-height: 1.6;
+}
+
+.image-meta,
+.image-likes {
+    margin: 0 0 0.6vw;
+    color: #333333;
+    font-family: Arial, sans-serif;
+    font-size: 0.85vw;
+}
+
+.image-likes .fa-heart {
+    color: #d1495b;
+}
+
+.image-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.like-form {
+    margin: 0;
+}
+
+/* Brief pulse when arriving at a block from a Like, Edit or gallery tile link. */
+.image-row.is-highlighted .image-content {
+    animation: row-highlight 2.2s ease;
+}
+
+@keyframes row-highlight {
+    0%,
+    60% {
+        box-shadow: inset 0 0 0 4px var(--gold);
+    }
+
+    100% {
+        box-shadow: inset 0 0 0 0 transparent;
+    }
+}
+
+/* 10. Forms (Create / Edit) ---------------------------------------------- */
+
+.form-heading {
+    margin: 0;
+    padding: 3vw 0vw 2vw 0vw;
+    color: #f8bd08;
+    font-family: 'Anton', sans-serif;
+    font-size: 4vw;
+    font-weight: 400;
+    text-align: center;
+    text-shadow: 4px 4px 0px navy, 4px 4px 8px white;
+}
+
+.form-container {
+    width: 80%;
+    margin: 0 auto;
+    padding-bottom: 3vw;
+}
+
+.form-container--narrow {
+    width: 70%;
+}
+
+.image-form .form-label {
+    margin-bottom: 0.15rem;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.form-field {
+    margin-bottom: 0.6rem;
+}
+
+.form-control {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+}
+
+.form-control[readonly] {
+    background-color: #d9dbe0;
+    cursor: not-allowed;
+}
+
+.form-hint {
+    display: block;
+    margin-top: 0.2rem;
+    color: #d5d8e0;
+    font-size: 0.78rem;
+}
+
+.field-error,
+.validation-summary {
+    display: block;
+    color: #ff9b9b;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.validation-summary ul {
+    margin: 0 0 0.5rem;
+    padding-left: 1.1rem;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+
+.input-validation-error {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 0.15rem rgba(255, 107, 107, 0.35);
+}
+
+.btn-submit.is-busy {
+    cursor: progress;
+    opacity: 0.75;
+}
+
+.image-preview {
+    margin: 0;
+    border: 1px solid var(--white-line);
+    background-color: var(--ink);
+}
+
+.image-preview-img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+.image-preview-caption {
+    padding: 0.35rem 0.6rem;
+    color: #d5d8e0;
+    font-size: 0.8rem;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.back-link-row {
+    margin: 0.8rem 0 0;
+}
+
+.back-link {
+    color: #d5d8e0;
+    text-decoration: none;
+}
+
+.back-link:hover,
+.back-link:focus-visible {
+    color: var(--gold);
+    text-decoration: underline;
+}
+
+/* 11. Details & Delete ---------------------------------------------------- */
+
+.confirm-heading {
+    margin: 0 0 0.5rem;
+    color: yellow;
+    font-family: 'Anton', sans-serif;
+    font-size: 2em;
+    font-weight: 400;
+    text-shadow: 2px 2px 0px navy, 2px 2px 4px white;
+}
+
+.detail-panel {
+    padding: 1rem 1.25rem 1.25rem;
+    border-top: 2px solid var(--white-line);
+    background-color: rgba(0, 0, 20, 0.45);
+    color: #ffffff;
+}
+
+.detail-panel-title {
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 180px;
+    align-items: start;
+    gap: 1.5rem;
+}
+
+.detail-list {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.detail-list dt {
+    font-weight: 600;
+}
+
+.detail-list dd {
+    overflow-wrap: anywhere;
+}
+
+.detail-thumb {
+    width: 180px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border: 1px solid var(--white-line);
+}
+
+.detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+
+/* 12. Contact page ---------------------------------------------------------- */
+
+.hero--contact {
+    background: none;
+    padding-bottom: 4vw;
+}
+
+.contact-container {
+    width: 92%;
+    margin: 2vw auto 0;
+}
+
+.contact-card {
+    width: 100%;
+    padding: 1vw 1.5vw 2vw;
+    border: 1px solid white;
+    background-color: var(--navy-card);
+    box-shadow: 10px 10px 0px 0px #f8f6b0;
+    text-align: center;
+}
+
+.contact-heading {
+    margin: 0 0 0.8rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 2px solid yellow;
+    color: yellow;
+    font-family: 'Niconne', cursive;
+    font-size: 2.5rem;
+    font-weight: 400;
+    text-shadow: 2px 2px 0px navy, 2px 2px 2px white;
+}
+
+.contact-text {
+    margin: 0;
+    color: yellow;
+    font-family: Arial, sans-serif;
+    font-size: 1vw;
+    line-height: 1.6;
+}
+
+.contact-text a,
+.sources-list a {
+    color: #e0e0e0;
+    transition: color 0.3s ease;
+}
+
+.contact-text a:hover,
+.contact-text a:focus-visible,
+.sources-list a:hover,
+.sources-list a:focus-visible {
+    color: #ffffff;
+}
+
+.sources-card {
+    margin-top: 3rem;
+}
+
+.sources-list {
+    margin: 1rem 0 0;
+    padding: 0;
+    columns: 3;
+    column-gap: 2rem;
+    font-family: Arial, sans-serif;
+    font-size: 0.9vw;
+    list-style: none;
+    text-align: left;
+}
+
+.sources-list li {
+    margin-bottom: 0.35rem;
+    break-inside: avoid;
+}
+
+/* 13. Account pages (Register / Login) ------------------------------------- */
+
+.page-account .site-main,
+.page-default .site-main {
+    background-color: #212121;
+}
+
+/* Other built-in Identity pages (manage account, log out, lockout...) share the account look. */
+.page-default .site-main {
+    padding: 1rem max(2.5vw, 1rem) 3rem;
+}
+
+.page-default .site-main hr {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.account-page {
+    padding: 0.5rem max(2.5vw, 1rem) 3rem;
+    color: #ffffff;
+}
+
+.account-title {
+    margin: 0 0 1rem;
+    font-size: 2rem;
+    font-weight: 500;
+}
+
+.account-subtitle {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.account-subtitle--accent {
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid #f2e94e;
+    color: #f2e94e;
+}
+
+.form-floating > label {
+    color: #555555;
+}
+
+.account-note,
+.account-links {
+    color: #cfcfcf;
+    font-size: 0.85rem;
+}
+
+.account-links {
+    margin: 1.2rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.account-links li {
+    margin-bottom: 0.4rem;
+}
+
+.account-note a,
+.account-links a {
+    color: #ffffff;
+}
+
+.account-tip {
+    margin-top: 1.5rem;
+    padding: 0.8rem 1rem;
+    border-left: 4px solid var(--gold);
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #e6e6e6;
+    font-size: 0.85rem;
+}
+
+.form-hint--account {
+    color: #bdbdbd;
+}
+
+/* 14. Message pages (errors, access denied, empty states) ----------------- */
+
+.message-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+    padding: 4vw 1rem;
+}
+
+.message-page--inline {
+    min-height: 40vh;
+}
+
+.message-card {
+    max-width: 640px;
+    padding: 2rem;
+    border: 1px solid white;
+    background-color: var(--night-panel);
+    box-shadow: 10px 10px 0px 0px #f8f6b0;
+    text-align: center;
+}
+
+.message-card .form-heading {
+    padding: 0.5rem 0 1rem;
+    font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.message-icon {
+    color: var(--gold);
+    font-size: 3rem;
+}
+
+.message-code {
+    margin: 0;
+    background-image: linear-gradient(to right, brown, yellow, white, yellow, brown);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-family: var(--font-display);
+    font-size: 6rem;
+    line-height: 1;
+}
+
+.message-text {
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.message-meta {
+    color: #c9cbd3;
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+}
+
+.message-meta code {
+    color: var(--gold-soft);
+}
+
+.message-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+/* 15. Prompt Lab (additional creative page) ------------------------------- */
+
+.hero--lab {
+    padding-bottom: 4vw;
+}
+
+.lab-section {
+    padding: 4vw 0;
+}
+
+.lab-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+    gap: 2rem;
+    width: 90%;
+    margin: 0 auto;
+}
+
+.lab-panel {
+    padding: 1.5rem;
+    border: 1px solid var(--white-line);
+    border-radius: 6px;
+    background-color: var(--night-panel);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+.lab-output {
+    position: sticky;
+    top: 1rem;
+}
+
+.lab-heading {
+    margin: 0 0 1rem;
+    color: var(--gold);
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    font-weight: 400;
+    text-shadow: 2px 2px 0px navy, 2px 2px 4px white;
+}
+
+.lab-heading .fa-solid {
+    font-size: 0.8em;
+}
+
+.lab-field {
+    margin-bottom: 1.1rem;
+}
+
+.lab-label {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.lab-label .fa-solid {
+    width: 1.2em;
+    color: var(--gold);
+}
+
+.lab-optional {
+    color: #c9cbd3;
+    font-weight: 400;
+}
+
+.chip-group {
+    margin: 0 0 1.1rem;
+    padding: 0;
+    border: 0;
+}
+
+.chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.chip {
+    padding: 0.35rem 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+}
+
+.chip:hover {
+    border-color: var(--gold);
+    transform: translateY(-2px);
+}
+
+.chip[aria-pressed="true"] {
+    border-color: var(--gold);
+    background-color: var(--gold);
+    color: var(--ink);
+}
+
+.prompt-output {
+    min-height: 7rem;
+    margin: 0;
+    padding: 1rem 1.1rem;
+    border-left: 6px solid var(--gold);
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #111111;
+    font-family: var(--font-text);
+    font-size: 1.15rem;
+    line-height: 1.6;
+}
+
+.prompt-output.is-empty {
+    color: #666666;
+    font-style: italic;
+}
+
+.prompt-output.is-updated {
+    animation: prompt-flash 0.6s ease;
+}
+
+@keyframes prompt-flash {
+    from {
+        background-color: #fff3c4;
+    }
+
+    to {
+        background-color: rgba(255, 255, 255, 0.95);
+    }
+}
+
+.prompt-meter {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    margin: 0.9rem 0 0.4rem;
+}
+
+.meter-step {
+    height: 8px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.2);
+    transition: background-color 0.3s ease;
+}
+
+.meter-step.is-filled {
+    background-image: linear-gradient(to right, #ff9933, var(--gold));
+}
+
+.prompt-stats {
+    margin: 0 0 1rem;
+    color: #d5d8e0;
+    font-size: 0.85rem;
+}
+
+.prompt-divider {
+    margin: 0 0.4rem;
+}
+
+.lab-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.prompt-feedback {
+    min-height: 1.4rem;
+    margin: 0.5rem 0;
+    color: #8ff0b5;
+    font-size: 0.85rem;
+}
+
+.btn-upload {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-weight: 600;
+}
+
+.btn-upload:hover,
+.btn-upload:focus-visible {
+    background-color: var(--gold);
+    color: var(--ink);
+}
+
+.saved-heading {
+    margin: 1.5rem 0 0.6rem;
+    color: #ffffff;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.saved-prompts {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.saved-prompt {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.06);
+    font-size: 0.8rem;
+}
+
+.saved-prompt-actions {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.saved-empty {
+    margin: 0;
+    color: #c9cbd3;
+    font-size: 0.8rem;
+}
+
+.saved-empty.is-hidden {
+    display: none;
+}
+
+.timeline-section {
+    width: 90%;
+    margin: 5vw auto 0;
+    text-align: center;
+}
+
+.timeline {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+}
+
+.timeline-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.timeline-year {
+    align-self: flex-start;
+    margin-bottom: 0.4rem;
+    padding: 0 0.6rem;
+    border-radius: 4px;
+    background-color: var(--gold);
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    letter-spacing: 1px;
+}
+
+.timeline-card {
+    flex: 1 1 auto;
+    padding: 1rem;
+    border: 1px solid var(--white-line);
+    border-radius: 6px;
+    background-color: var(--night-panel);
+}
+
+.timeline-title {
+    margin: 0 0 0.4rem;
+    color: #ffffff;
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.timeline-text {
+    margin: 0 0 0.6rem;
+    color: #e6e6e6;
+    font-family: var(--font-text);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.timeline-source {
+    color: var(--gold);
+    font-size: 0.85rem;
+}
+
+/* 16. Toasts --------------------------------------------------------------- */
+
+.toast-stack {
+    position: fixed;
+    top: 4rem;
+    right: 1rem;
+    z-index: 1080;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: min(380px, calc(100vw - 2rem));
+}
+
+.site-toast {
+    border: 0;
+    border-left: 5px solid #3ecf8e;
+    background-color: rgba(10, 16, 40, 0.96);
+    color: #ffffff;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.site-toast--error {
+    border-left-color: #ff5c5c;
+}
+
+.site-toast .toast-body {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.site-toast .btn-close {
+    margin-left: auto;
+}
+
+.site-toast--success .fa-solid {
+    color: #3ecf8e;
+}
+
+.site-toast--error .fa-solid {
+    color: #ff5c5c;
+}
+
+/* 17. Motion & reveal ------------------------------------------------------ */
+
+/* Blocks appear only when fully inside the viewport (site.js toggles .is-visible).
+   Without JavaScript everything stays visible. */
+.js .reveal-on-view {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.js .reveal-on-view.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .js .reveal-on-view {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    .tool-tile,
+    .tool-tile-image,
+    .tool-overlay,
+    .upload-tile-image,
+    .upload-tile-label {
+        transition-duration: 0.01s;
+    }
+}
+
+/* 18. Responsive ----------------------------------------------------------- */
+
+/* Large screens: keep the long lines of the timeline readable. */
+@media (max-width: 1199.98px) {
+    .timeline {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Small laptops and large tablets: 1vw text becomes too small, so scale it up. */
+@media (max-width: 991.98px) {
+    .contact-text,
+    .image-prompt {
+        font-size: 1.45vw;
+    }
+
+    .sources-list {
+        columns: 2;
+        font-size: 1.3vw;
+    }
+
+    .image-meta,
+    .image-likes {
+        font-size: 1.2vw;
+    }
+
+    .lab-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .lab-output {
+        position: static;
+    }
+}
+
+/* Tablets and phones (< 768px): blocks stack and font sizes increase. */
+@media (max-width: 767.98px) {
+    .hero--home {
+        min-height: 0;
+    }
+
+    .hero-text {
+        max-width: 84vw;
+        font-size: 2.6vw;
+    }
+
+    .upload-cta {
+        font-size: 2.2vw;
+    }
+
+    .feature-section {
+        min-height: 0;
+        padding: 3vw 0;
+    }
+
+    .feature-row,
+    .feature-row--tiles-first {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 3vw;
+        width: 88%;
+    }
+
+    .feature-card {
+        padding: 2vw 2.5vw 2.5vw;
+    }
+
+    .feature-title {
+        font-size: 5.5vw;
+    }
+
+    .feature-text {
+        font-size: 2.3vw;
+    }
+
+    .tool-tiles {
+        gap: 2.5vw;
+    }
+
+    .tool-tile {
+        flex-basis: 38vw;
+        font-size: 2.2vw;
+    }
+
+    .upload-title {
+        font-size: 6vw;
+    }
+
+    .upload-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 3vw;
+        padding: 3vw 4vw 1vw;
+    }
+
+    .upload-tile {
+        font-size: 2.4vw;
+    }
+
+    .gallery-notice,
+    .gallery-more {
+        font-size: 2.2vw;
+    }
+
+    /* AI Images list: the picture becomes a band that repeats across the screen. */
+    .image-row,
+    .image-row:nth-child(even) {
+        grid-template-columns: minmax(0, 1fr);
+        min-height: 0;
+    }
+
+    .image-media {
+        height: 220px;
+    }
+
+    .image-photo {
+        position: static;
+        flex: 0 0 auto;
+        width: auto;
+        height: 100%;
+        aspect-ratio: 1 / 1;
+    }
+
+    .image-photo--repeat {
+        display: block;
+    }
+
+    .image-content {
+        padding: 4vw 5vw 5vw;
+    }
+
+    .image-generator {
+        font-size: 4.2vw;
+        letter-spacing: 5px;
+    }
+
+    .image-prompt {
+        font-size: 2.4vw;
+    }
+
+    .image-meta,
+    .image-likes {
+        font-size: 2vw;
+    }
+
+    .form-heading {
+        font-size: 7vw;
+    }
+
+    .form-container,
+    .form-container--narrow {
+        width: 88%;
+    }
+
+    .detail-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .contact-card {
+        padding: 3vw 4vw 4vw;
+    }
+
+    .contact-text {
+        font-size: 2.4vw;
+    }
+
+    .sources-list {
+        columns: 1;
+        font-size: 2.3vw;
+    }
+}
+
+/* Phones (< 576px): the menu collapses and text grows again for readability. */
+@media (max-width: 575.98px) {
+    .site-navbar .navbar-nav {
+        padding: 0.4rem 0;
+    }
+
+    .hero-title {
+        font-size: 9vw;
+    }
+
+    .hero-text {
+        font-size: 3.6vw;
+    }
+
+    .upload-cta {
+        font-size: 3.4vw;
+    }
+
+    .feature-title {
+        font-size: 7vw;
+    }
+
+    .feature-text {
+        font-size: 3.6vw;
+    }
+
+    .tool-tile {
+        flex-basis: 40vw;
+        font-size: 3.2vw;
+    }
+
+    .upload-title {
+        font-size: 8vw;
+    }
+
+    .upload-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4vw;
+        padding: 4vw 6vw 1vw;
+    }
+
+    .upload-tile {
+        font-size: 3.8vw;
+    }
+
+    .gallery-notice,
+    .gallery-more {
+        font-size: 3.4vw;
+    }
+
+    .image-media {
+        height: 180px;
+    }
+
+    .image-generator {
+        font-size: 5.6vw;
+        letter-spacing: 4px;
+    }
+
+    .image-prompt {
+        font-size: 3.6vw;
+    }
+
+    .image-meta,
+    .image-likes {
+        font-size: 3.2vw;
+    }
+
+    .form-heading {
+        font-size: 9vw;
+    }
+
+    .confirm-heading {
+        font-size: 1.5em;
+    }
+
+    .contact-heading {
+        font-size: 2.2rem;
+    }
+
+    .contact-text {
+        font-size: 3.6vw;
+    }
+
+    .sources-list {
+        font-size: 3.4vw;
+    }
+
+    .footer-links a {
+        font-size: 0.85rem;
+    }
+
+    .timeline {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .lab-panel {
+        padding: 1rem;
+    }
+
+    .toast-stack {
+        top: 3.5rem;
+        right: 0.5rem;
+        left: 0.5rem;
+        max-width: none;
+    }
+}

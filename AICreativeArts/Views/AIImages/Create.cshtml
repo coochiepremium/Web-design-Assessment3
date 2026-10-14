@@ -1,0 +1,16 @@
+@model AIImageFormViewModel
+@{
+    ViewData["Title"] = "Upload AI Image";
+    ViewData["BodyClass"] = "page-form";
+}
+
+<section class="form-page" aria-labelledby="create-title">
+    <h1 id="create-title" class="form-heading">Upload AI Image</h1>
+    <div class="form-container">
+        <partial name="_ImageForm" model="Model" />
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

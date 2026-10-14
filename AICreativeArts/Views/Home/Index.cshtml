@@ -1,0 +1,25 @@
+@{
+    ViewData["Title"] = "AI in Creative Arts";
+    ViewData["BodyClass"] = "page-home";
+}
+
+<section class="hero hero--home" aria-labelledby="hero-title">
+    <h1 id="hero-title" class="hero-title hero-title--stroked">@SiteContent.HeroTitle</h1>
+    <p class="hero-text">
+        @SiteContent.HeroText
+        <br /><em><a class="hero-source" href="https://en.wikipedia.org/wiki/Artificial_intelligence_art" target="_blank" rel="noopener noreferrer">@SiteContent.HeroSource</a></em>
+    </p>
+</section>
+
+<div class="parallax-section">
+    @foreach (var section in SiteContent.Sections)
+    {
+        <partial name="_FeatureSection" model="section" />
+    }
+
+    <section id="upload-ai-images" class="upload-section" aria-labelledby="upload-title">
+        <h2 id="upload-title" class="upload-title">Upload AI images</h2>
+        <partial name="_UploadCallToAction" />
+        @await Component.InvokeAsync("UploadGallery")
+    </section>
+</div>

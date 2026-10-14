@@ -1,0 +1,33 @@
+@model UploadGalleryViewModel
+
+@if (Model.Unavailable)
+{
+    <p class="gallery-notice">The gallery is taking a short break. Please refresh the page in a moment.</p>
+}
+else if (Model.Images.Count == 0)
+{
+    <p class="gallery-notice">No AI images have been uploaded yet &ndash; be the first to share one!</p>
+}
+else
+{
+    @* Each tile shows the generator name; site.js adds the image, which fades in on mouse over. *@
+    <ul class="upload-grid" aria-label="Uploaded AI images, most liked first">
+        @foreach (var image in Model.Images)
+        {
+            <li class="upload-grid-item">
+                <a class="upload-tile" href="@Url.ImageAnchor(image.Id)" data-image="@Url.UploadedImage(image.Filename)"
+                   data-fallback="@Url.Content("~/img/image-unavailable.jpg")">
+                    <span class="upload-tile-label">@image.ImageGenerator</span>
+                    <span class="visually-hidden">: @image.Prompt (@image.Like likes). View it on the AI Images page.</span>
+                </a>
+            </li>
+        }
+    </ul>
+
+    @if (Model.TotalCount > Model.Images.Count)
+    {
+        <p class="gallery-more">
+            <a asp-controller="AIImages" asp-action="Index">See all @Model.TotalCount AI images</a>
+        </p>
+    }
+}

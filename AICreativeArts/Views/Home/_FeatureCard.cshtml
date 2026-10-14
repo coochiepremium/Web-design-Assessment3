@@ -1,0 +1,9 @@
+@model FeatureSection
+
+<div class="feature-card">
+    <h3 id="@(Model.Id)-title" class="feature-title">@Model.Title</h3>
+    <p class="feature-text">
+        @Model.Description
+        <a class="read-more" href="@Model.ReadMoreUrl" target="_blank" rel="noopener noreferrer">Read more<span class="visually-hidden"> about @Model.Title (opens in a new tab)</span></a>
+    </p>
+</div>

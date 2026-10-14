@@ -1,0 +1,69 @@
+@model SiteOptions
+@{
+    ViewData["Title"] = "Contact & About";
+    ViewData["BodyClass"] = "page-contact";
+    ViewData["Description"] = "Contact details, information about the MuseAI website and credits for every image, icon, font and text source.";
+}
+
+<section class="hero hero--contact" aria-labelledby="contact-title">
+    <h1 id="contact-title" class="hero-title">Contact &amp; About</h1>
+
+    <div class="container-fluid contact-container">
+        <div class="row g-4 g-xl-5 contact-row">
+            <div class="col-12 col-md-4 d-flex">
+                <section class="contact-card" aria-labelledby="contact-us-title">
+                    <h1 id="contact-us-title" class="contact-heading">Contact Us</h1>
+                    <p class="contact-text">
+                        This website is developed by @Model.DeveloperName
+                        <br />To get in contact please email
+                        <a href="mailto:@Model.ContactEmail">@Model.ContactEmail</a>
+                    </p>
+                </section>
+            </div>
+
+            <div class="col-12 col-md-4 d-flex">
+                <section class="contact-card" aria-labelledby="about-us-title">
+                    <h1 id="about-us-title" class="contact-heading">About Us</h1>
+                    <p class="contact-text">
+                        This website provides an introduction to Artificial Intelligence in the Creative Arts &ndash;
+                        AI tools for visual art, music and writing &ndash; and was created as partial fulfillment of the
+                        assessment requirements of Web Design and Programming at the University of Canberra.
+                        <br />This site is built on the ASP.NET CORE MVC framework with Entity Framework Core, and employs
+                        Bootstrap, Flexbox and CSS Grid responsive design techniques.
+                    </p>
+                </section>
+            </div>
+
+            <div class="col-12 col-md-4 d-flex">
+                <section class="contact-card" aria-labelledby="copyright-title">
+                    <h1 id="copyright-title" class="contact-heading">Copyright</h1>
+                    <p class="contact-text">
+                        All images used in this website are original generative artworks created for this site with
+                        <a href="https://python-pillow.org/" target="_blank" rel="noopener noreferrer">Pillow</a> and
+                        <a href="https://numpy.org/" target="_blank" rel="noopener noreferrer">NumPy</a>
+                        (no stock or third-party images are used).
+                        <br />The icons for the footer are from
+                        <a href="https://fontawesome.com/" target="_blank" rel="noopener noreferrer">Font Awesome</a>.
+                        <br />The Anton, Montserrat, Lato, Oxygen and Niconne fonts are from
+                        <a href="https://fonts.google.com/" target="_blank" rel="noopener noreferrer">Google Fonts</a>.
+                        <br />Responsive layout by <a href="https://getbootstrap.com/" target="_blank" rel="noopener noreferrer">Bootstrap</a>.
+                    </p>
+                </section>
+            </div>
+        </div>
+
+        <section class="contact-card sources-card" aria-labelledby="sources-title">
+            <h1 id="sources-title" class="contact-heading">Sources</h1>
+            <p class="contact-text">
+                The descriptions of AI tools, the Prompt Lab timeline and the home page introduction were researched
+                and written in our own words using these sources:
+            </p>
+            <ul class="sources-list">
+                @foreach (var (title, url) in SiteContent.TextSources)
+                {
+                    <li><a href="@url" target="_blank" rel="noopener noreferrer">@title</a></li>
+                }
+            </ul>
+        </section>
+    </div>
+</section>

@@ -1,0 +1,24 @@
+# Build output
+bin/
+obj/
+TestResults/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+*.user
+*.suo
+*.rsuser
+
+# Local SQLite database (created automatically on first run)
+app.db
+app.db-shm
+app.db-wal
+
+# Uploaded images are user data; sample images are restored from wwwroot/img/samples at start-up
+AICreativeArts/wwwroot/uploads/*
+!AICreativeArts/wwwroot/uploads/.gitkeep
+AICreativeArts/wwwroot/uploads-tests/
+
+# Python cache from tools/generate_art.py
+__pycache__/

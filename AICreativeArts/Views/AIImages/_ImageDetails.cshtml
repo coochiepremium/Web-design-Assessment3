@@ -1,0 +1,24 @@
+@model AIImage
+
+<div class="detail-layout">
+    <dl class="row detail-list">
+        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Prompt)</dt>
+        <dd class="col-sm-9">@Model.Prompt</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.ImageGenerator)</dt>
+        <dd class="col-sm-9">@Model.ImageGenerator</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.UploadDate)</dt>
+        <dd class="col-sm-9">
+            <time datetime="@Model.UploadDate.ToString("yyyy-MM-ddTHH:mm")">@Model.UploadDate.ToString("d MMMM yyyy, h:mm tt")</time>
+        </dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Filename)</dt>
+        <dd class="col-sm-9">@Model.Filename</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Like)</dt>
+        <dd class="col-sm-9">@Model.Like</dd>
+    </dl>
+    <img class="detail-thumb" src="@Url.UploadedImage(Model.Filename)" alt="@Model.Prompt"
+         data-fallback="@Url.Content("~/img/image-unavailable.jpg")" />
+</div>

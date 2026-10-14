@@ -1,0 +1,25 @@
+@page
+@model AccessDeniedModel
+@{
+    ViewData["Title"] = "Access denied";
+    ViewData["BodyClass"] = "page-message";
+}
+
+<section class="message-page" aria-labelledby="denied-title">
+    <div class="message-card">
+        <i class="fa-solid fa-lock message-icon" aria-hidden="true"></i>
+        <h1 id="denied-title" class="form-heading">Access Denied</h1>
+        <p class="message-text">
+            Sorry, your account does not have permission to open this page.
+            Only administrators can view details, edit or delete AI images.
+        </p>
+        @if (Model.AttemptedUrl is not null)
+        {
+            <p class="message-meta">Requested: <code>@Model.AttemptedUrl</code></p>
+        }
+        <div class="message-actions">
+            <a class="btn btn-warning" asp-area="" asp-controller="AIImages" asp-action="Index">Back to AI Images</a>
+            <a class="btn btn-outline-light" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+        </div>
+    </div>
+</section>

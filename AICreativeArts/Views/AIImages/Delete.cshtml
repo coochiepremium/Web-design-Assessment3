@@ -1,0 +1,25 @@
+@model AIImage
+@{
+    ViewData["Title"] = "Delete AI Image";
+    ViewData["BodyClass"] = "page-form";
+}
+
+<section class="form-page" aria-labelledby="delete-title">
+    <h1 id="delete-title" class="form-heading">Delete AI Image</h1>
+    <div class="form-container form-container--narrow">
+        <h3 class="confirm-heading">Are you sure you want to delete this?</h3>
+        <div class="detail-panel">
+            <h4 class="detail-panel-title">AIImage</h4>
+            <partial name="_ImageDetails" model="Model" />
+
+            <form class="detail-actions" asp-action="Delete" asp-route-id="@Model.Id" method="post">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa-solid fa-trash" aria-hidden="true"></i> Delete
+                </button>
+                <span class="detail-separator" aria-hidden="true">|</span>
+                <a class="back-link" asp-action="Index">Back to List</a>
+            </form>
+        </div>
+    </div>
+</section>

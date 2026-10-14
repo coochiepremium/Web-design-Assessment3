@@ -1,0 +1,14 @@
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <p class="upload-cta">
+        <a asp-area="" asp-controller="AIImages" asp-action="Create">Click here to upload a new AI image</a>
+    </p>
+}
+else
+{
+    <p class="upload-cta">
+        Please <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Create", "AIImages", new { area = "" })">login</a>
+        or <a asp-area="Identity" asp-page="/Account/Register" asp-route-returnUrl="@Url.Action("Create", "AIImages", new { area = "" })">register</a>
+        to upload your AI images.
+    </p>
+}

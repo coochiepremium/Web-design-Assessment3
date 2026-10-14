@@ -1,0 +1,24 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Something went wrong";
+    ViewData["BodyClass"] = "page-message";
+}
+
+<section class="message-page" aria-labelledby="error-title">
+    <div class="message-card">
+        <i class="fa-solid fa-palette message-icon" aria-hidden="true"></i>
+        <h1 id="error-title" class="form-heading">Oops! Something went wrong</h1>
+        <p class="message-text">
+            Sorry, an unexpected error stopped this page from loading. The problem has been logged,
+            so please try again in a moment.
+        </p>
+        @if (Model?.ShowRequestId == true)
+        {
+            <p class="message-meta">Reference: <code>@Model.RequestId</code></p>
+        }
+        <div class="message-actions">
+            <a class="btn btn-warning" asp-area="" asp-controller="Home" asp-action="Index">Back to Home</a>
+            <a class="btn btn-outline-light" asp-area="" asp-controller="AIImages" asp-action="Index">Browse AI Images</a>
+        </div>
+    </div>
+</section>
