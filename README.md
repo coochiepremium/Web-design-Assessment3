@@ -62,10 +62,11 @@ then follow the checklist in [docs/04-images-content-and-references.md](docs/04-
 dotnet test
 ```
 
-There are 87 automated tests covering:
+There are 96 automated tests covering:
 
 - role-based access;
-- likes, uploads, edits and deletes;
+- likes (once per login, stored in the database), uploads, edits and deletes;
+- built-in Identity pages that never error;
 - upload validation;
 - image slots and credits;
 - compliance with the brief's "no inline CSS/JS" rule.

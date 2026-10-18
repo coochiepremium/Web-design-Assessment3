@@ -61,7 +61,7 @@ Browser ──HTTP──▶ Kestrel web server
                     │
                     ▼  Program.cs: middleware pipeline, in order
    ExceptionHandler → StatusCodePages → HSTS (not in Development) → HTTPS redirect → security headers
-   → static files (wwwroot) → routing → authentication → authorisation → session
+   → static files (wwwroot) → routing → authentication → authorisation
                     │
         ┌───────────┴───────────────────────┐
         ▼                                   ▼
@@ -72,7 +72,7 @@ Browser ──HTTP──▶ Kestrel web server
         │ uses services (dependency injection)
         ├── ApplicationDbContext (EF Core) ──▶ SQLite file app.db
         ├── ImageStorage   (checks and saves uploads in wwwroot/uploads)
-        ├── SessionLikeTracker (one like per image per login)
+        ├── LoginLikeTracker (one like per image per login, stored in the ImageLikes table)
         └── MediaLibrary   (has each image slot been filled? credits from appsettings.json)
         │
         ▼
@@ -106,12 +106,13 @@ Browser ──HTTP──▶ Kestrel web server
 | File / folder | What it does |
 |---|---|
 | `AICreativeArts.csproj` | Project file: targets .NET 8 and lists the NuGet packages (Identity, EF Core SQLite, EF tools). |
-| `Program.cs` | Start-up: registers services (database, Identity with roles, session, options, app services, MVC with a global antiforgery filter) and builds the middleware pipeline. Then it prepares the database and starts the site. |
+| `Program.cs` | Start-up: registers services (database, Identity with roles and the login-id claim, options, app services, MVC with global antiforgery and Identity-guard filters) and builds the middleware pipeline. Then it prepares the database and starts the site. |
 | `appsettings.json` | Configuration: database connection string, your name and email (`Site`), image credits (`ImageCredits`), upload limits (`Uploads`), seed accounts (`SeedAccounts`) and logging. |
 | `appsettings.Development.json` | Logging overrides used when running in Development. |
 | `Properties/launchSettings.json` | Launch profiles (`http`, `https`, `IIS Express`) with URLs and the environment name. |
 | **Authorization/** | |
 | `Roles.cs` | The role name constant `Admin`. Members are logged-in users without a role. |
+| `LoginSession.cs` | Gives every sign-in a new random *login id* claim in the sign-in cookie, which the like rule uses. |
 | **Content/**: the site's words and image list, kept out of the views | |
 | `SiteContent.cs` | Home page text: the hero, the three "case files" with their example tiles and links, and the list of text sources shown on the Contact page. |
 | `FeatureSection.cs` | The `FeatureSection` (case block) and `CaseExample` (square tile) record types. |
@@ -121,20 +122,22 @@ Browser ──HTTP──▶ Kestrel web server
 | `HomeController.cs` | Home, Contact and Artist Shield pages, plus the friendly error page (`Error`) and status pages (`Status`: 404, 403, 400…). |
 | `AIImagesController.cs` | The AI image gallery: Index (public), Create (members), Details/Edit/Delete (admin), Like (members, once per login), with validation and error handling. |
 | **Data/** | |
-| `ApplicationDbContext.cs` | The EF Core database context: the Identity tables plus `AIImages` (column lengths and an index on `Like`). |
+| `ApplicationDbContext.cs` | The EF Core database context: the Identity tables, `AIImages` (column lengths, an index on `Like`) and `ImageLikes` (a unique login/image index). |
 | `DbInitializer.cs` | Runs at start-up: backs up an outdated development database, applies migrations, then creates the Admin role and the seed accounts. |
-| `Migrations/…_InitialCreate.cs` | The migration that creates every table. `…Designer.cs` and `ApplicationDbContextModelSnapshot.cs` are EF's records of the model. |
+| `Migrations/…_InitialCreate.cs` | The migration that creates every table (Identity, `AIImages`, `ImageLikes`). `…Designer.cs` and `ApplicationDbContextModelSnapshot.cs` are EF's records of the model. |
 | **Filters/** | |
 | `UploadSizeGuardAttribute.cs` | Stops uploads over 10 MB before anything reads them, and sends the user back to the form with a message. |
+| `IdentityPageGuardFilter.cs` | Makes the built-in Identity pages fail politely: redirects instead of exceptions, and friendly status pages instead of plain-text errors. |
 | **Infrastructure/** | |
 | `Options.cs` | Strongly typed settings classes: `SiteOptions`, `UploadOptions`, `SeedAccountOptions`, `ImageCredit`, `ImageCreditOptions`. |
 | `SiteUrlExtensions.cs` | URL helpers: `Url.UploadedImage(filename)` and `Url.ImageAnchor(id)` (e.g. `/AIImages#image-3`). |
 | **Models/** | |
 | `AIImage.cs` | The `AIImage` model from the brief (Id, Prompt, ImageGenerator, UploadDate, Filename, Like, canIncreaseLike), plus length limits. |
+| `ImageLike.cs` | One like by one login for one image (the "one like per image per login" rule). |
 | `ErrorViewModel.cs` | Data for the error page, and `StatusCodeViewModel` (the friendly title and message for each HTTP status code). |
 | **Services/** | |
 | `ImageStorage.cs` | Validates uploads (size, extension, real file signature), saves them with a safe unique name, and deletes them safely. |
-| `LikeTracker.cs` | Remembers in the session which images the user has liked during this login. |
+| `LikeTracker.cs` | Records likes in the database against the current login id, increases the like count atomically, and reports which images this login has already liked. |
 | `MediaLibrary.cs` | Checks whether each image slot's file exists, and reads each slot's credit from configuration. |
 | **TagHelpers/** | |
 | `ImageSlotTagHelper.cs` | `<image-slot key="…">` renders the image, or a placeholder describing it. `<background-slot-note key="…">` shows a note while a background image is missing. |
@@ -178,6 +181,7 @@ Browser ──HTTP──▶ Kestrel web server
 | `AIImageWorkflowTests.cs` | Likes (once per login), antiforgery, sorting, uploading (including over-posting and fake files), admin edit and delete. |
 | `ImageStorageTests.cs` | File signature checks, size limits, safe file names, path-traversal protection. |
 | `ImageSlotTests.cs` | Image slots: placeholders, credits, the Contact page, plain 404s for missing files, the outdated-database backup. |
+| `IdentityAndLikeRulesTests.cs` | Built-in Identity pages never error; likes are counted once per login and per user, survive without any browser state but the sign-in cookie, and are removed with their image. |
 | `ComplianceTests.cs` | Scans every view for inline styles, `<style>` blocks, internal scripts and inline event handlers, and checks that the menu and footer link to every main page. |
 | `Infrastructure/SiteFactory.cs` | Starts the real site in memory with a temporary database for each test class. |
 | `Infrastructure/BrowserExtensions.cs` | Helpers to log in, log out and post forms with antiforgery tokens, like a browser. |
@@ -205,7 +209,7 @@ Browser ──HTTP──▶ Kestrel web server
 | Mouse over / mouse out (CSS + JS); JavaScript produces HTML5 elements | `site.js`: `initToolTiles` and `initUploadTiles` build the captions and images and handle `mouseover`/`mouseout` |
 | Blocks appear only when fully in the viewport | `site.js` `initRevealOnView` (an `IntersectionObserver`) |
 | Anchor hyperlinks | Gallery tiles link to `/AIImages#image-{id}`; Like returns to the liked block |
-| List sorted by likes, one like per login | `AIImagesController.Index`, `Like` and `Services/LikeTracker.cs` |
+| List sorted by likes, one like per login | `AIImagesController.Index` and `Like`, `Services/LikeTracker.cs`, `Authorization/LoginSession.cs` |
 | Upload Date and Like read-only | `readonly` inputs, and the server always sets both values |
 | Images uploaded to `wwwroot/uploads/` | `Services/ImageStorage.cs` |
 | Handle all exceptions | Friendly error and status pages, validation, guarded file and database operations (see [docs/02-back-end.md](docs/02-back-end.md)) |

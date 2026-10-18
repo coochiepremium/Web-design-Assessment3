@@ -57,7 +57,7 @@ AICreativeArts/
 │   ├── _ViewImports.cshtml  _ViewStart.cshtml
 │   └── Account/
 │       ├── _ViewImports.cshtml
-│       ├── Login.cshtml  Register.cshtml  AccessDenied.cshtml   (+ .cshtml.cs page models)
+│       └── Login.cshtml  Register.cshtml  AccessDenied.cshtml   (+ .cshtml.cs page models)
 └── wwwroot/
     ├── css/site.css                         every style written for this site
     ├── js/site.js                           every script written for this site
@@ -1187,11 +1187,11 @@ Below 1200 px, `.timeline` drops from 3 to 2 columns.
 | **Skip link** | `<a class="skip-link" href="#main-content">Skip to main content</a>` is the first focusable element. It sits off-screen until focused, then appears at the top left. `<main id="main-content" tabindex="-1">` can receive focus, so the next Tab continues inside the page content |
 | **Landmarks** | `<header>`, `<nav aria-label="Main">`, `<main>`, `<footer>` with `<nav aria-label="Footer">` |
 | **Current page** | `NavActiveTagHelper` adds `aria-current="page"` (and `.active`) to the menu link of the current page |
-| **Headings** | One `h1` per page section; every `<section>` and `<article>` has `aria-labelledby` pointing at its heading; hidden `h2`s on Home and the AI Images list keep the outline in order where the brief asks for `h3` |
+| **Headings** | Each page starts with one `h1` (the Contact page also uses `h1` for its card headings, as the brief asks); every `<section>` and `<article>` has `aria-labelledby` pointing at its heading; hidden `h2`s on Home and the AI Images list keep the outline in order where the brief asks for `h3` |
 | **Icons** | Every Font Awesome `<i>` has `aria-hidden="true"`; the meaning is in visible text or an `aria-label` (for example the footer's icon-only links: "YouTube (opens in a new tab)") |
 | **New tabs** | External links use `target="_blank" rel="noopener noreferrer"` and say "(opens in a new tab)", in visually hidden text or in the `aria-label` |
 | **Hover content** | The case-tile captions are `aria-hidden`, but the tile's `aria-label` contains the same text. Gallery tiles carry the prompt and like count as visually hidden text. `bindHover` also reacts to keyboard `focus`/`blur` |
-| **Focus styles** | `:focus-visible { outline: 3px solid var(--hazard); outline-offset: 2px; }` everywhere. Hover effects are repeated for `:focus-visible` (menu, footer, Read more, back links, admin picture links, brand glitch) |
+| **Focus styles** | `:focus-visible { outline: 3px solid var(--hazard); outline-offset: 2px; }` everywhere. Hover effects are repeated for `:focus-visible`, for example on the menu, footer links and icons, Read more, back links, admin picture links and the brand glitch |
 | **Forms** | Every field has a `<label>` (`asp-for`); hints are linked with `aria-describedby` (`readonly-hint`, `file-hint`); validation summaries have `role="alert"`; Identity inputs have `aria-required` and `autocomplete`; the busy submit button gets `aria-busy="true"`; the disabled "Liked" button has a `title` explaining why |
 | **Quiz and checklist** | Each question is a `<fieldset>` with a `<legend>`; the number badge is `aria-hidden`; the score is a live region (`role="status" aria-live="polite"`); the `<progress>` bar is labelled by its text (`aria-labelledby="shield-progress-text"`) |
 | **Messages** | The toast stack is `aria-live="polite"`; success toasts are `role="status"`, error toasts `role="alert"`; the close button has `aria-label="Close"` |
