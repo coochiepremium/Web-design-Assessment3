@@ -1,17 +1,17 @@
 @model FeatureSection
 
-@* One home page block. The DOM order follows the desktop layout, so on small
-   screens the blocks stack in the same order as the sample design. *@
+@* One home page block ("case file"). The DOM order follows the desktop layout, so on
+   small screens the blocks stack in the same order as the sample design. *@
 <section id="@Model.Id" class="feature-section" aria-labelledby="@(Model.Id)-title">
     <div class="feature-row reveal-on-view @(Model.TextFirst ? "feature-row--text-first" : "feature-row--tiles-first")">
         @if (Model.TextFirst)
         {
             <partial name="_FeatureCard" model="Model" />
-            <partial name="_ToolTiles" model="Model.Tools" />
+            <partial name="_CaseTiles" model="Model.Examples" />
         }
         else
         {
-            <partial name="_ToolTiles" model="Model.Tools" />
+            <partial name="_CaseTiles" model="Model.Examples" />
             <partial name="_FeatureCard" model="Model" />
         }
     </div>

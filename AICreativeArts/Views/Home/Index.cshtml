@@ -1,17 +1,29 @@
 @{
-    ViewData["Title"] = "AI in Creative Arts";
+    ViewData["Title"] = "The Dark Side of AI Art";
     ViewData["BodyClass"] = "page-home";
 }
 
 <section class="hero hero--home" aria-labelledby="hero-title">
+    <p class="hero-eyebrow">
+        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> @SiteContent.HeroEyebrow
+    </p>
     <h1 id="hero-title" class="hero-title hero-title--stroked">@SiteContent.HeroTitle</h1>
     <p class="hero-text">
         @SiteContent.HeroText
-        <br /><em><a class="hero-source" href="https://en.wikipedia.org/wiki/Artificial_intelligence_art" target="_blank" rel="noopener noreferrer">@SiteContent.HeroSource</a></em>
+        <br /><em><a class="hero-source" href="@SiteContent.HeroSourceUrl" target="_blank" rel="noopener noreferrer">@SiteContent.HeroSource</a></em>
     </p>
+    <a class="scroll-cue" href="#@SiteContent.Sections[0].Id">
+        <span>See the evidence</span>
+        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+    </a>
+    <background-slot-note key="@ImageLibrary.HeroBackground" />
 </section>
 
 <div class="parallax-section">
+    <background-slot-note key="@ImageLibrary.SectionBackground" />
+    @* The brief asks for h3 block headings; this hidden h2 keeps the heading outline in order for screen readers. *@
+    <h2 class="visually-hidden">Three case files: how AI harms the creative arts</h2>
+
     @foreach (var section in SiteContent.Sections)
     {
         <partial name="_FeatureSection" model="section" />
@@ -19,6 +31,9 @@
 
     <section id="upload-ai-images" class="upload-section" aria-labelledby="upload-title">
         <h2 id="upload-title" class="upload-title">Upload AI images</h2>
+        <p class="upload-intro">
+            Help others learn to recognise machine-made art: share AI-generated images with the prompt and tool used to create them.
+        </p>
         <partial name="_UploadCallToAction" />
         @await Component.InvokeAsync("UploadGallery")
     </section>

@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using AICreativeArts.Tests.Infrastructure;
 using Xunit;
 
 namespace AICreativeArts.Tests;
@@ -10,7 +11,7 @@ namespace AICreativeArts.Tests;
 /// </summary>
 public partial class ComplianceTests
 {
-    private static readonly string ProjectDirectory = FindProjectDirectory();
+    private static readonly string ProjectDirectory = ProjectPaths.WebProject;
 
     public static IEnumerable<object[]> Views() =>
         Directory.EnumerateFiles(ProjectDirectory, "*.cshtml", SearchOption.AllDirectories)
@@ -53,25 +54,8 @@ public partial class ComplianceTests
             Assert.Contains("asp-controller=\"Home\" asp-action=\"Index\"", part);
             Assert.Contains("asp-controller=\"AIImages\" asp-action=\"Index\"", part);
             Assert.Contains("asp-controller=\"Home\" asp-action=\"Contact\"", part);
-            Assert.Contains("asp-controller=\"Home\" asp-action=\"PromptLab\"", part);
+            Assert.Contains("asp-controller=\"Home\" asp-action=\"ArtistShield\"", part);
         }
-    }
-
-    private static string FindProjectDirectory()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null)
-        {
-            var candidate = Path.Combine(directory.FullName, "AICreativeArts", "AICreativeArts.csproj");
-            if (File.Exists(candidate))
-            {
-                return Path.GetDirectoryName(candidate)!;
-            }
-
-            directory = directory.Parent;
-        }
-
-        throw new DirectoryNotFoundException("Could not find the AICreativeArts project folder.");
     }
 
     [GeneratedRegex(@"\sstyle\s*=", RegexOptions.IgnoreCase)]

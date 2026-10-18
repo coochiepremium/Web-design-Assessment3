@@ -1,0 +1,122 @@
+@{
+    ViewData["Title"] = "Artist Shield";
+    ViewData["BodyClass"] = "page-shield";
+    ViewData["Description"] = "Test what you know about AI's impact on artists, follow a checklist to protect your own work, and explore a timeline of key events.";
+    var stepCount = ArtistShieldContent.Steps.Count;
+}
+
+<section class="hero hero--shield" aria-labelledby="shield-title">
+    <p class="hero-eyebrow">
+        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Know the risks &middot; Protect your work
+    </p>
+    <h1 id="shield-title" class="hero-title hero-title--stroked">Artist Shield</h1>
+    <p class="hero-text">
+        AI companies have collected art from across the internet to train their models. Find out how much you know
+        about the harm this causes, then work through practical steps that make your own art harder to take.
+    </p>
+    <background-slot-note key="@ImageLibrary.HeroBackground" />
+</section>
+
+<div class="parallax-section shield-section">
+    <div class="shield-grid">
+        <section id="quiz" class="shield-panel quiz-panel" aria-labelledby="quiz-title">
+            <h2 id="quiz-title" class="panel-heading">
+                <i class="fa-solid fa-circle-question" aria-hidden="true"></i> Test your knowledge
+            </h2>
+            <p class="panel-intro">
+                @ArtistShieldContent.Quiz.Count questions about how AI affects artists. Choose an answer for each, then check your score.
+            </p>
+
+            <form id="quiz-form" class="quiz-form" action="#quiz" method="get">
+                @for (var q = 0; q < ArtistShieldContent.Quiz.Count; q++)
+                {
+                    var question = ArtistShieldContent.Quiz[q];
+                    <fieldset class="quiz-question" data-correct="@question.CorrectIndex">
+                        <legend class="quiz-legend">
+                            <span class="quiz-number" aria-hidden="true">@(q + 1)</span>
+                            <span>@question.Question</span>
+                        </legend>
+                        <div class="quiz-options">
+                            @for (var o = 0; o < question.Options.Count; o++)
+                            {
+                                <label class="quiz-option">
+                                    <input type="radio" name="@question.Id" value="@o" />
+                                    <span>@question.Options[o]</span>
+                                </label>
+                            }
+                        </div>
+                        <p class="quiz-feedback" hidden>
+                            <span class="quiz-feedback-result"></span>
+                            @question.Explanation
+                            <a href="@question.SourceUrl" target="_blank" rel="noopener noreferrer">Source<span class="visually-hidden"> (opens in a new tab)</span></a>
+                        </p>
+                    </fieldset>
+                }
+
+                <div class="quiz-actions">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fa-solid fa-check-double" aria-hidden="true"></i> Check my answers
+                    </button>
+                    <button type="reset" class="btn btn-outline-light">
+                        <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Try again
+                    </button>
+                </div>
+                <p id="quiz-score" class="quiz-score" role="status" aria-live="polite"></p>
+            </form>
+        </section>
+
+        <section id="protect" class="shield-panel steps-panel" aria-labelledby="steps-title">
+            <h2 id="steps-title" class="panel-heading">
+                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Protect your art
+            </h2>
+            <p class="panel-intro">Tick each step once you have done it. Your progress is saved in this browser only.</p>
+
+            <progress id="shield-progress" class="shield-progress" max="@stepCount" value="0" aria-labelledby="shield-progress-text"></progress>
+            <p id="shield-progress-text" class="shield-progress-text">0 of @stepCount steps done</p>
+
+            <ul class="shield-steps">
+                @foreach (var step in ArtistShieldContent.Steps)
+                {
+                    <li class="shield-step">
+                        <label class="shield-step-label">
+                            <input class="shield-check" type="checkbox" data-step="@step.Id" />
+                            <span class="shield-step-body">
+                                <span class="shield-step-title">@step.Title</span>
+                                <span class="shield-step-detail">@step.Detail</span>
+                            </span>
+                        </label>
+                        @if (step.LinkUrl is not null)
+                        {
+                            <a class="shield-step-link" href="@step.LinkUrl" target="_blank" rel="noopener noreferrer">
+                                @step.LinkText <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                                <span class="visually-hidden">(opens in a new tab)</span>
+                            </a>
+                        }
+                    </li>
+                }
+            </ul>
+            <button id="shield-reset" type="button" class="btn btn-outline-light btn-sm">
+                <i class="fa-solid fa-eraser" aria-hidden="true"></i> Clear my progress
+            </button>
+        </section>
+    </div>
+
+    <section class="timeline-section" aria-labelledby="timeline-title">
+        <h2 id="timeline-title" class="upload-title">How the Harm Unfolded</h2>
+        <ol class="timeline">
+            @foreach (var entry in ArtistShieldContent.Timeline)
+            {
+                <li class="timeline-item reveal-on-view reveal-once">
+                    <span class="timeline-date">@entry.Date</span>
+                    <div class="timeline-card">
+                        <h3 class="timeline-title">@entry.Title</h3>
+                        <p class="timeline-text">@entry.Text</p>
+                        <a class="timeline-source" href="@entry.SourceUrl" target="_blank" rel="noopener noreferrer">
+                            Source<span class="visually-hidden">: @entry.Title (opens in a new tab)</span>
+                        </a>
+                    </div>
+                </li>
+            }
+        </ol>
+    </section>
+</div>

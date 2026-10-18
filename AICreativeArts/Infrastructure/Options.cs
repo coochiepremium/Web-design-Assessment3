@@ -5,7 +5,7 @@ public class SiteOptions
 {
     public const string SectionName = "Site";
 
-    public string Name { get; set; } = "MuseAI";
+    public string Name { get; set; } = "AI Unmasked";
 
     public string DeveloperName { get; set; } = "";
 
@@ -46,4 +46,38 @@ public class SeedAccount
 
     /// <summary>Role to assign, or empty for a member (no role).</summary>
     public string? Role { get; set; }
+}
+
+/// <summary>
+/// Credit for one image slot, configured in the "ImageCredits" section of appsettings.json
+/// using the slot's key (see Content/ImageLibrary.cs). Shown on the Contact page.
+/// </summary>
+public class ImageCredit
+{
+    /// <summary>Who made the image, e.g. "Jane Doe" (or "Your name" for your own photo).</summary>
+    public string Creator { get; set; } = "";
+
+    /// <summary>Where it came from, e.g. "Unsplash", "Pexels", "Wikimedia Commons" or "Own work".</summary>
+    public string Source { get; set; } = "";
+
+    /// <summary>Link to the original page of the image.</summary>
+    public string Url { get; set; } = "";
+
+    /// <summary>The licence, e.g. "Unsplash Licence", "CC BY 4.0" or "Public domain".</summary>
+    public string Licence { get; set; } = "";
+
+    public bool IsComplete => !string.IsNullOrWhiteSpace(Creator) && !string.IsNullOrWhiteSpace(Source);
+
+    public bool HasLink => Uri.TryCreate(Url, UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp);
+}
+
+/// <summary>All image credits, keyed by image slot key (case-insensitive).</summary>
+public class ImageCreditOptions : Dictionary<string, ImageCredit>
+{
+    public const string SectionName = "ImageCredits";
+
+    public ImageCreditOptions()
+        : base(StringComparer.OrdinalIgnoreCase)
+    {
+    }
 }

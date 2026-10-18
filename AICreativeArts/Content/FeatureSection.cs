@@ -1,18 +1,26 @@
 namespace AICreativeArts.Content;
 
-/// <summary>A home page block: a text card plus two square tool images.</summary>
+/// <summary>
+/// A home page block ("case file"): a text card plus two square example tiles.
+/// <see cref="TextFirst"/> controls the side the card sits on (and the order on phones).
+/// </summary>
 public record FeatureSection(
     string Id,
+    string CaseLabel,
     string Title,
     string Description,
+    string KeyFact,
     string ReadMoreUrl,
     bool TextFirst,
-    IReadOnlyList<CreativeTool> Tools);
+    IReadOnlyList<CaseExample> Examples);
 
-/// <summary>A square tool image with the text shown on mouse over and its external link.</summary>
-public record CreativeTool(
+/// <summary>
+/// A square tile: its image comes from the image slot <see cref="SlotKey"/>, the text
+/// appears on mouse over, and a click opens <see cref="Url"/> in a new tab.
+/// </summary>
+public record CaseExample(
     string Name,
-    string ImagePath,
+    string SlotKey,
     string HoverText,
     string Source,
     string Url);

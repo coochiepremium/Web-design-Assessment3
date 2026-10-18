@@ -1,9 +1,14 @@
 @model FeatureSection
 
 <div class="feature-card">
+    <p class="case-label">@Model.CaseLabel</p>
     <h3 id="@(Model.Id)-title" class="feature-title">@Model.Title</h3>
     <p class="feature-text">
         @Model.Description
         <a class="read-more" href="@Model.ReadMoreUrl" target="_blank" rel="noopener noreferrer">Read more<span class="visually-hidden"> about @Model.Title (opens in a new tab)</span></a>
+    </p>
+    <p class="key-fact">
+        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+        <span>@Model.KeyFact</span>
     </p>
 </div>

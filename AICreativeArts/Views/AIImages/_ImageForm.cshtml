@@ -2,8 +2,6 @@
 @inject Microsoft.Extensions.Options.IOptions<UploadOptions> UploadSettings
 @{
     var isEdit = Model.Id > 0;
-    var placeholder = Url.Content("~/img/upload-placeholder.jpg");
-    var previewSrc = isEdit ? Url.UploadedImage(Model.CurrentFilename) : placeholder;
     var accept = ".jpg,.jpeg,.png,.gif,.webp,image/jpeg,image/png,image/gif,image/webp";
     var maxBytes = UploadSettings.Value.MaxFileBytes;
 }
@@ -58,13 +56,13 @@
                 @if (isEdit)
                 {
                     <input asp-for="ImageFile" type="file" class="form-control" accept="@accept"
-                           data-max-bytes="@maxBytes" data-preview="#image-preview" aria-describedby="file-hint" />
+                           data-max-bytes="@maxBytes" data-preview="#image-preview-figure" aria-describedby="file-hint" />
                     <small id="file-hint" class="form-hint">Leave empty to keep the current image. JPG, PNG, GIF or WEBP, up to 5 MB.</small>
                 }
                 else
                 {
                     <input asp-for="ImageFile" type="file" class="form-control" accept="@accept"
-                           data-max-bytes="@maxBytes" data-preview="#image-preview" aria-describedby="file-hint"
+                           data-max-bytes="@maxBytes" data-preview="#image-preview-figure" aria-describedby="file-hint"
                            data-val="true" data-val-required="Please choose an image file to upload." />
                     <small id="file-hint" class="form-hint">JPG, PNG, GIF or WEBP, up to 5 MB.</small>
                 }
@@ -79,11 +77,21 @@
     </div>
 
     <div class="col-md-4">
-        <figure class="image-preview">
-            <img id="image-preview" class="image-preview-img" src="@previewSrc" data-default-src="@previewSrc"
-                 data-fallback="@Url.Content("~/img/image-unavailable.jpg")"
-                 alt="@(isEdit ? "Current image" : "Preview of the image you choose")" />
-            <figcaption class="image-preview-caption">@(isEdit ? "Current image" : "Image preview")</figcaption>
+        <figure class="image-preview" id="image-preview-figure">
+            @if (isEdit)
+            {
+                <img class="image-preview-img image-preview-default" src="@Url.UploadedImage(Model.CurrentFilename)"
+                     alt="Current image" data-image-fallback />
+            }
+            else
+            {
+                @* The brief's "default image": an image slot you fill with your own picture. *@
+                <image-slot key="@ImageLibrary.UploadPreview" class="image-preview-img image-preview-default" lazy="false" />
+            }
+            <img id="image-preview" class="image-preview-img image-preview-chosen" alt="Preview of the image you chose" hidden />
+            <figcaption class="image-preview-caption" data-default-caption="@(isEdit ? "Current image" : "Image preview")">
+                @(isEdit ? "Current image" : "Image preview")
+            </figcaption>
         </figure>
     </div>
 </div>

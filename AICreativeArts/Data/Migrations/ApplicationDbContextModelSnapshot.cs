@@ -49,62 +49,6 @@ namespace AICreativeArts.Data.Migrations
                     b.HasIndex("Like");
 
                     b.ToTable("AIImages", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Filename = "sample-golden-currents.jpg",
-                            ImageGenerator = "Flow Field Generator",
-                            Like = 7,
-                            Prompt = "Thousands of golden light particles drifting along an invisible current, tracing silky strands across a deep midnight-blue canvas, long-exposure style.",
-                            UploadDate = new DateTime(2026, 9, 1, 9, 30, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Filename = "sample-stained-glass.jpg",
-                            ImageGenerator = "Voronoi Mosaic Generator",
-                            Like = 5,
-                            Prompt = "A jewel-toned stained-glass window built from seventy irregular cells with dark lead lines, warm light glowing from the upper left.",
-                            UploadDate = new DateTime(2026, 9, 3, 14, 5, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Filename = "sample-harmonograph.jpg",
-                            ImageGenerator = "Harmonograph Simulator",
-                            Like = 4,
-                            Prompt = "A decaying pendulum drawing in neon cyan fading to magenta, looping ribbons spiralling towards the centre on a black background.",
-                            UploadDate = new DateTime(2026, 9, 6, 19, 45, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Filename = "sample-interference.jpg",
-                            ImageGenerator = "Wave Interference Generator",
-                            Like = 3,
-                            Prompt = "Three ripple sources overlapping on a still pond, rendered as a glowing heat map of indigo, magenta, orange and gold.",
-                            UploadDate = new DateTime(2026, 9, 10, 11, 20, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Filename = "sample-circle-garden.jpg",
-                            ImageGenerator = "Circle Packing Generator",
-                            Like = 2,
-                            Prompt = "A playful circle-packing pattern of concentric dots in orange, lavender, teal and gold on warm cream paper, mid-century print style.",
-                            UploadDate = new DateTime(2026, 9, 14, 16, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Filename = "sample-dusk-ridges.jpg",
-                            ImageGenerator = "Procedural Landscape Generator",
-                            Like = 1,
-                            Prompt = "Layered violet mountain ridges fading into the haze at dusk under a pale full moon, minimalist flat illustration.",
-                            UploadDate = new DateTime(2026, 9, 18, 8, 15, 0, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

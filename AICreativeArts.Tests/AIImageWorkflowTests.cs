@@ -9,36 +9,37 @@ using Xunit;
 namespace AICreativeArts.Tests;
 
 /// <summary>Likes, uploads, edits and deletes, exercised through real HTTP requests.</summary>
-public class AIImageWorkflowTests : IClassFixture<MuseAIFactory>
+public class AIImageWorkflowTests : IClassFixture<SiteFactory>
 {
     // A valid 1x1 PNG.
     private static readonly byte[] TinyPng = Convert.FromBase64String(
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=");
 
-    private readonly MuseAIFactory _factory;
+    private readonly SiteFactory _factory;
 
-    public AIImageWorkflowTests(MuseAIFactory factory) => _factory = factory;
+    public AIImageWorkflowTests(SiteFactory factory) => _factory = factory;
 
     [Fact]
     public async Task Member_can_like_an_image_once_per_login()
     {
+        var id = await _factory.AddImageAsync("Like Check", likes: 3);
         var browser = _factory.CreateBrowser();
         await browser.LoginAsync(BrowserExtensions.MemberEmail, BrowserExtensions.MemberPassword);
-        var before = await browser.GetLikeCountAsync(4);
+        Assert.Equal(3, await browser.GetLikeCountAsync(id));
 
-        var first = await browser.PostFormAsync("/AIImages/Like/4", "/AIImages");
+        var first = await browser.PostFormAsync($"/AIImages/Like/{id}", "/AIImages");
         Assert.Equal(HttpStatusCode.Redirect, first.StatusCode);
-        Assert.Equal("/AIImages#image-4", first.Headers.Location!.OriginalString);
-        Assert.Equal(before + 1, await browser.GetLikeCountAsync(4));
+        Assert.Equal($"/AIImages#image-{id}", first.Headers.Location!.OriginalString);
+        Assert.Equal(4, await browser.GetLikeCountAsync(id));
 
-        await browser.PostFormAsync("/AIImages/Like/4", "/AIImages");
-        Assert.Equal(before + 1, await browser.GetLikeCountAsync(4));
+        await browser.PostFormAsync($"/AIImages/Like/{id}", "/AIImages");
+        Assert.Equal(4, await browser.GetLikeCountAsync(id));
 
         // Logging out and back in allows one more like.
         await browser.LogoutAsync();
         await browser.LoginAsync(BrowserExtensions.MemberEmail, BrowserExtensions.MemberPassword);
-        await browser.PostFormAsync("/AIImages/Like/4", "/AIImages");
-        Assert.Equal(before + 2, await browser.GetLikeCountAsync(4));
+        await browser.PostFormAsync($"/AIImages/Like/{id}", "/AIImages");
+        Assert.Equal(5, await browser.GetLikeCountAsync(id));
     }
 
     [Fact]
@@ -66,6 +67,9 @@ public class AIImageWorkflowTests : IClassFixture<MuseAIFactory>
     [Fact]
     public async Task List_is_sorted_by_likes_descending()
     {
+        await _factory.AddImageAsync("Sort Low", likes: 1);
+        await _factory.AddImageAsync("Sort High", likes: 50);
+        await _factory.AddImageAsync("Sort Middle", likes: 20);
         using var scope = _factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var expected = await db.AIImages.OrderByDescending(i => i.Like).ThenByDescending(i => i.UploadDate)

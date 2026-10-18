@@ -6,17 +6,16 @@
 }
 else if (Model.Images.Count == 0)
 {
-    <p class="gallery-notice">No AI images have been uploaded yet &ndash; be the first to share one!</p>
+    <p class="gallery-notice">No AI images have been uploaded yet. Log in and upload the first example so others can learn to spot machine-made art.</p>
 }
 else
 {
     @* Each tile shows the generator name; site.js adds the image, which fades in on mouse over. *@
-    <ul class="upload-grid" aria-label="Uploaded AI images, most liked first">
+    <ul class="upload-grid">
         @foreach (var image in Model.Images)
         {
             <li class="upload-grid-item">
-                <a class="upload-tile" href="@Url.ImageAnchor(image.Id)" data-image="@Url.UploadedImage(image.Filename)"
-                   data-fallback="@Url.Content("~/img/image-unavailable.jpg")">
+                <a class="upload-tile" href="@Url.ImageAnchor(image.Id)" data-image="@Url.UploadedImage(image.Filename)">
                     <span class="upload-tile-label">@image.ImageGenerator</span>
                     <span class="visually-hidden">: @image.Prompt (@image.Like likes). View it on the AI Images page.</span>
                 </a>

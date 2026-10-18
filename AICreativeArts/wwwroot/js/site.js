@@ -1,8 +1,21 @@
 /* ==========================================================================
-   MuseAI - site.js
+   AI Unmasked - site.js
    All JavaScript for the site lives in this external file (no inline or
    internal scripts). Each feature checks that its elements exist first, so
    the file can be loaded safely on every page.
+
+   Contents
+     helpers ............ ready, each, createElement, bindHover
+     initToolTiles ...... home: mouse-over captions on the case tiles
+     initRevealOnView ... home + Artist Shield: blocks appear when fully visible
+     initUploadTiles .... home: gallery images fade in on mouse over
+     initImageRepeats ... AI Images list: repeating image band on phones
+     initImageFallbacks . any uploaded image whose file is missing
+     initAnchorHighlight  AI Images list: highlight the block in the URL hash
+     initUploadForm ..... Create/Edit: preview + file checks + double-submit guard
+     initToasts ......... status messages hide themselves
+     initQuiz ........... Artist Shield: quiz marking and score
+     initChecklist ...... Artist Shield: protection steps saved in localStorage
    ========================================================================== */
 (function () {
     'use strict';
@@ -54,13 +67,14 @@
     }
 
     /* ---------------------------------------------------------------------
-       Home: square tool tiles show researched text on mouse over.
+       Home: each case tile shows its researched text on mouse over.
        The caption elements are produced here from data-* attributes.
        --------------------------------------------------------------------- */
     function initToolTiles() {
         each('.tool-tile[data-hover-text]', function (tile) {
             var overlay = createElement('span', 'tool-overlay');
             overlay.setAttribute('aria-hidden', 'true');
+            overlay.appendChild(createElement('span', 'tool-overlay-title', tile.getAttribute('data-hover-title')));
             overlay.appendChild(createElement('span', 'tool-overlay-text', tile.getAttribute('data-hover-text')));
             overlay.appendChild(createElement('span', 'tool-overlay-source', tile.getAttribute('data-hover-source')));
             tile.appendChild(overlay);
@@ -69,9 +83,10 @@
     }
 
     /* ---------------------------------------------------------------------
-       Home & Prompt Lab: a block appears only while it is fully inside the
-       viewport and disappears again when it is not. Blocks taller than the
-       screen (small phones) are shown once they fill most of it.
+       A block appears only while it is fully inside the viewport and
+       disappears again when it is not (brief). Blocks taller than the screen
+       (small phones) are shown once they fill most of it. Elements marked
+       .reveal-once stay visible after they first appear.
        --------------------------------------------------------------------- */
     function initRevealOnView() {
         var blocks = document.querySelectorAll('.reveal-on-view');
@@ -89,23 +104,22 @@
         var observer = new IntersectionObserver(function (entries) {
             var viewportHeight = window.innerHeight || root.clientHeight;
             entries.forEach(function (entry) {
+                var block = entry.target;
                 var fullyVisible = entry.intersectionRatio >= 0.98;
                 var fillsViewport = entry.boundingClientRect.height > viewportHeight * 0.9 &&
                     entry.intersectionRect.height >= viewportHeight * 0.6;
-                var visible = fullyVisible || fillsViewport;
-                var block = entry.target;
 
                 if (block.classList.contains('reveal-once')) {
-                    if (entry.intersectionRatio >= 0.5 || fillsViewport) {
+                    if (entry.intersectionRatio >= 0.4 || fillsViewport) {
                         block.classList.add('is-visible');
                         observer.unobserve(block);
                     }
                     return;
                 }
 
-                block.classList.toggle('is-visible', visible);
+                block.classList.toggle('is-visible', fullyVisible || fillsViewport);
             });
-        }, { threshold: [0, 0.25, 0.5, 0.75, 0.9, 0.98, 1] });
+        }, { threshold: [0, 0.25, 0.4, 0.5, 0.75, 0.9, 0.98, 1] });
 
         Array.prototype.forEach.call(blocks, function (block) {
             observer.observe(block);
@@ -118,12 +132,19 @@
        --------------------------------------------------------------------- */
     function initUploadTiles() {
         each('.upload-tile[data-image]', function (tile) {
+            var source = tile.getAttribute('data-image');
+            if (!source) {
+                return;
+            }
             var image = createElement('img', 'upload-tile-image');
-            image.src = tile.getAttribute('data-image');
             image.alt = '';
             image.loading = 'lazy';
             image.setAttribute('aria-hidden', 'true');
-            image.setAttribute('data-fallback', tile.getAttribute('data-fallback') || '');
+            image.addEventListener('error', function () {
+                // Missing file: keep the generator label instead of a broken image.
+                image.remove();
+            });
+            image.src = source;
             tile.appendChild(image);
             bindHover(tile, 'show-image');
         });
@@ -147,25 +168,32 @@
     }
 
     /* ---------------------------------------------------------------------
-       Any image with data-fallback swaps to a friendly placeholder if its
-       file is missing, instead of showing a broken-image icon.
+       Uploaded images marked data-image-fallback are replaced by a friendly
+       placeholder (built here) if their file cannot be loaded.
        --------------------------------------------------------------------- */
-    function useFallback(image) {
-        var fallback = image.getAttribute('data-fallback');
-        if (!fallback || image.getAttribute('data-fallback-used')) {
+    function replaceWithPlaceholder(image) {
+        if (!image.parentNode) {
             return;
         }
-        image.setAttribute('data-fallback-used', 'true');
-        image.src = fallback;
+        if (image.classList.contains('image-photo--repeat')) {
+            image.remove();
+            return;
+        }
+        var placeholder = createElement('span', 'image-slot image-slot--broken ' + image.className.replace('image-photo', ''));
+        placeholder.setAttribute('role', 'img');
+        placeholder.setAttribute('aria-label', 'Image unavailable');
+        placeholder.appendChild(createElement('span', 'image-slot-badge', 'Image unavailable'));
+        placeholder.appendChild(createElement('span', 'image-slot-text', 'The uploaded file could not be found. An admin can upload it again from the Edit page.'));
+        image.parentNode.replaceChild(placeholder, image);
     }
 
     function initImageFallbacks() {
-        each('img[data-fallback]', function (image) {
+        each('img[data-image-fallback]', function (image) {
             image.addEventListener('error', function () {
-                useFallback(image);
+                replaceWithPlaceholder(image);
             });
-            if (image.complete && image.naturalWidth === 0 && image.getAttribute('src')) {
-                useFallback(image);
+            if (image.complete && image.naturalWidth === 0 && image.getAttribute('src') !== null) {
+                replaceWithPlaceholder(image);
             }
         });
     }
@@ -175,8 +203,8 @@
        home page tile) brings that block to the top and highlights it.
        --------------------------------------------------------------------- */
     function initAnchorHighlight() {
-        var match = /^#image-\d+$/.test(window.location.hash) ? window.location.hash.slice(1) : null;
-        var target = match ? document.getElementById(match) : null;
+        var id = /^#image-\d+$/.test(window.location.hash) ? window.location.hash.slice(1) : null;
+        var target = id ? document.getElementById(id) : null;
         if (!target) {
             return;
         }
@@ -196,9 +224,10 @@
             return;
         }
 
-        var preview = document.querySelector(input.getAttribute('data-preview'));
-        var caption = preview ? preview.parentNode.querySelector('figcaption') : null;
-        var defaultCaption = caption ? caption.textContent : '';
+        var figure = document.querySelector(input.getAttribute('data-preview'));
+        var chosen = figure ? figure.querySelector('.image-preview-chosen') : null;
+        var caption = figure ? figure.querySelector('figcaption') : null;
+        var defaultCaption = caption ? caption.getAttribute('data-default-caption') : '';
         var message = document.querySelector('[data-valmsg-for="' + input.name + '"]');
         var maxBytes = parseInt(input.getAttribute('data-max-bytes'), 10) || 5 * 1024 * 1024;
         var allowed = /\.(jpe?g|png|gif|webp)$/i;
@@ -207,8 +236,8 @@
         function showError(text) {
             if (message) {
                 message.textContent = text;
-                message.classList.remove('field-validation-valid');
-                message.classList.add('field-validation-error');
+                message.classList.toggle('field-validation-error', !!text);
+                message.classList.toggle('field-validation-valid', !text);
             }
             input.classList.toggle('input-validation-error', !!text);
         }
@@ -218,9 +247,12 @@
                 URL.revokeObjectURL(objectUrl);
                 objectUrl = null;
             }
-            if (preview) {
-                preview.removeAttribute('data-fallback-used');
-                preview.src = preview.getAttribute('data-default-src');
+            if (chosen) {
+                chosen.hidden = true;
+                chosen.removeAttribute('src');
+            }
+            if (figure) {
+                figure.classList.remove('is-previewing');
             }
             if (caption) {
                 caption.textContent = defaultCaption;
@@ -251,8 +283,12 @@
                 URL.revokeObjectURL(objectUrl);
             }
             objectUrl = URL.createObjectURL(file);
-            if (preview) {
-                preview.src = objectUrl;
+            if (chosen) {
+                chosen.src = objectUrl;
+                chosen.hidden = false;
+            }
+            if (figure) {
+                figure.classList.add('is-previewing');
             }
             if (caption) {
                 caption.textContent = 'New image: ' + file.name;
@@ -296,239 +332,130 @@
     }
 
     /* ---------------------------------------------------------------------
-       Prompt Lab: build an AI art prompt from chips, copy / save it, and
-       carry it to the upload form.
+       Artist Shield: mark the quiz, explain each answer and show a score.
+       The correct option's index is stored in each fieldset's data-correct.
        --------------------------------------------------------------------- */
-    var STORAGE_KEY = 'museai.savedPrompts';
+    function initQuiz() {
+        var form = document.getElementById('quiz-form');
+        if (!form) {
+            return;
+        }
+        var score = document.getElementById('quiz-score');
+        var questions = form.querySelectorAll('.quiz-question');
 
-    function readSaved() {
+        function clearMarks() {
+            Array.prototype.forEach.call(questions, function (question) {
+                question.classList.remove('is-correct', 'is-wrong', 'is-unanswered');
+                each('.quiz-option', function (option) {
+                    option.classList.remove('is-correct', 'is-wrong');
+                }, question);
+                question.querySelector('.quiz-feedback').hidden = true;
+            });
+            score.textContent = '';
+        }
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            clearMarks();
+
+            var right = 0;
+            var unanswered = 0;
+            Array.prototype.forEach.call(questions, function (question) {
+                var correct = parseInt(question.getAttribute('data-correct'), 10);
+                var options = question.querySelectorAll('.quiz-option');
+                var picked = question.querySelector('input:checked');
+                var result = question.querySelector('.quiz-feedback-result');
+
+                options[correct].classList.add('is-correct');
+                if (!picked) {
+                    unanswered++;
+                    question.classList.add('is-unanswered');
+                    result.textContent = 'Not answered.';
+                } else if (parseInt(picked.value, 10) === correct) {
+                    right++;
+                    question.classList.add('is-correct');
+                    result.textContent = 'Correct!';
+                } else {
+                    question.classList.add('is-wrong');
+                    picked.closest('.quiz-option').classList.add('is-wrong');
+                    result.textContent = 'Not quite.';
+                }
+                question.querySelector('.quiz-feedback').hidden = false;
+            });
+
+            var total = questions.length;
+            var verdict = right === total ? 'Outstanding: you know exactly what is at stake.'
+                : right >= total / 2 ? 'Good effort. Read the explanations to fill the gaps.'
+                    : 'The harm is easy to miss. The explanations below show what really happened.';
+            score.textContent = 'You scored ' + right + ' out of ' + total + '. ' + verdict +
+                (unanswered ? ' (' + unanswered + ' unanswered)' : '');
+        });
+
+        form.addEventListener('reset', function () {
+            window.setTimeout(clearMarks, 0);
+        });
+    }
+
+    /* ---------------------------------------------------------------------
+       Artist Shield: protection checklist, remembered in this browser.
+       Storage can be blocked (private mode), so every access is guarded.
+       --------------------------------------------------------------------- */
+    var CHECKLIST_KEY = 'aiunmasked.shieldSteps';
+
+    function readSteps() {
         try {
-            var value = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '[]');
-            return Array.isArray(value) ? value.filter(function (item) { return typeof item === 'string'; }) : [];
+            var value = JSON.parse(window.localStorage.getItem(CHECKLIST_KEY) || '[]');
+            return Array.isArray(value) ? value : [];
         } catch (e) {
             return [];
         }
     }
 
-    function writeSaved(list) {
+    function writeSteps(steps) {
         try {
-            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-            return true;
+            window.localStorage.setItem(CHECKLIST_KEY, JSON.stringify(steps));
         } catch (e) {
-            return false;
+            // Progress simply is not remembered when storage is unavailable.
         }
     }
 
-    function copyText(text) {
-        if (navigator.clipboard && window.isSecureContext) {
-            return navigator.clipboard.writeText(text);
-        }
-        return new Promise(function (resolve, reject) {
-            var helper = createElement('textarea', 'visually-hidden');
-            helper.value = text;
-            helper.setAttribute('readonly', '');
-            document.body.appendChild(helper);
-            helper.select();
-            try {
-                if (document.execCommand('copy')) {
-                    resolve();
-                } else {
-                    reject(new Error('copy failed'));
-                }
-            } catch (e) {
-                reject(e);
-            } finally {
-                document.body.removeChild(helper);
-            }
-        });
-    }
-
-    function initPromptLab() {
-        var output = document.getElementById('prompt-output');
-        if (!output) {
+    function initChecklist() {
+        var progress = document.getElementById('shield-progress');
+        if (!progress) {
             return;
         }
+        var text = document.getElementById('shield-progress-text');
+        var boxes = document.querySelectorAll('.shield-check');
+        var saved = readSteps();
 
-        var order = ['style', 'lighting', 'palette', 'mood', 'framing'];
-        var labels = ['Empty', 'Basic', 'Basic', 'Good', 'Good', 'Detailed', 'Masterful'];
-        var placeholder = output.textContent.trim();
-        var custom = document.getElementById('custom-subject');
-        var strength = document.getElementById('prompt-strength');
-        var words = document.getElementById('prompt-words');
-        var copyButton = document.getElementById('prompt-copy');
-        var saveButton = document.getElementById('prompt-save');
-        var uploadLink = document.getElementById('prompt-upload');
-        var feedback = document.getElementById('prompt-feedback');
-        var savedList = document.getElementById('saved-prompts');
-        var savedEmpty = document.getElementById('saved-empty');
-        var steps = document.querySelectorAll('.meter-step');
-        var current = '';
-        var feedbackTimer = null;
-
-        function selected(group) {
-            var chip = document.querySelector('.chip-group[data-group="' + group + '"] .chip[aria-pressed="true"]');
-            return chip ? chip.getAttribute('data-value') : '';
-        }
-
-        function capitalise(text) {
-            return text.charAt(0).toUpperCase() + text.slice(1);
-        }
-
-        function say(text) {
-            feedback.textContent = text;
-            window.clearTimeout(feedbackTimer);
-            feedbackTimer = window.setTimeout(function () {
-                feedback.textContent = '';
-            }, 3500);
-        }
-
-        function build() {
-            var subject = (custom.value || '').trim() || selected('subject');
-            var details = order.map(selected).filter(Boolean);
-            var parts = subject ? [subject].concat(details) : details;
-            current = parts.length ? capitalise(parts.join(', ')) + '.' : '';
-
-            output.textContent = current || placeholder;
-            output.classList.toggle('is-empty', !current);
-            output.classList.remove('is-updated');
-            if (current && !reduceMotion) {
-                void output.offsetWidth;
-                output.classList.add('is-updated');
-            }
-
-            var count = parts.length;
-            Array.prototype.forEach.call(steps, function (step, index) {
-                step.classList.toggle('is-filled', index < count);
-            });
-            strength.textContent = labels[Math.min(count, labels.length - 1)];
-            words.textContent = current ? current.split(/\s+/).length : 0;
-            copyButton.disabled = !current;
-            saveButton.disabled = !current;
-
-            var base = uploadLink.getAttribute('data-base-href');
-            uploadLink.href = current ? base + '?prompt=' + encodeURIComponent(current) : base;
-        }
-
-        function press(chip, pressed) {
-            chip.setAttribute('aria-pressed', pressed ? 'true' : 'false');
-        }
-
-        each('.chip-group', function (group) {
-            group.addEventListener('click', function (event) {
-                var chip = event.target.closest('.chip');
-                if (!chip) {
-                    return;
+        function update() {
+            var done = [];
+            Array.prototype.forEach.call(boxes, function (box) {
+                box.closest('.shield-step').classList.toggle('is-done', box.checked);
+                if (box.checked) {
+                    done.push(box.getAttribute('data-step'));
                 }
-                var wasPressed = chip.getAttribute('aria-pressed') === 'true';
-                each('.chip', function (other) {
-                    press(other, false);
-                }, group);
-                press(chip, !wasPressed);
-                if (group.getAttribute('data-group') === 'subject' && !wasPressed) {
-                    custom.value = '';
-                }
-                build();
             });
-        });
-
-        custom.addEventListener('input', function () {
-            if (custom.value.trim()) {
-                each('.chip-group[data-group="subject"] .chip', function (chip) {
-                    press(chip, false);
-                });
-            }
-            build();
-        });
-
-        document.getElementById('prompt-random').addEventListener('click', function () {
-            custom.value = '';
-            each('.chip-group', function (group) {
-                var chips = group.querySelectorAll('.chip');
-                var pick = Math.floor(Math.random() * chips.length);
-                Array.prototype.forEach.call(chips, function (chip, index) {
-                    press(chip, index === pick);
-                });
-            });
-            build();
-            say('A fresh combination - try another if it does not inspire you!');
-        });
-
-        document.getElementById('prompt-clear').addEventListener('click', function () {
-            custom.value = '';
-            each('.chip', function (chip) {
-                press(chip, false);
-            });
-            build();
-            say('Cleared. Start again whenever you are ready.');
-        });
-
-        copyButton.addEventListener('click', function () {
-            if (!current) {
-                return;
-            }
-            copyText(current).then(function () {
-                say('Copied to your clipboard.');
-            }, function () {
-                say('Copying is blocked in this browser - please select the text and copy it manually.');
-            });
-        });
-
-        function renderSaved() {
-            var list = readSaved();
-            savedList.textContent = '';
-            list.forEach(function (text, index) {
-                var item = createElement('li', 'saved-prompt');
-                item.appendChild(createElement('span', 'saved-prompt-text', text));
-
-                var actions = createElement('span', 'saved-prompt-actions');
-                var copy = createElement('button', 'btn btn-outline-light btn-sm', 'Copy');
-                copy.type = 'button';
-                copy.setAttribute('aria-label', 'Copy saved prompt ' + (index + 1));
-                copy.addEventListener('click', function () {
-                    copyText(text).then(function () {
-                        say('Saved prompt copied.');
-                    }, function () {
-                        say('Copying is blocked in this browser.');
-                    });
-                });
-
-                var remove = createElement('button', 'btn btn-outline-danger btn-sm', 'Remove');
-                remove.type = 'button';
-                remove.setAttribute('aria-label', 'Remove saved prompt ' + (index + 1));
-                remove.addEventListener('click', function () {
-                    var updated = readSaved();
-                    updated.splice(index, 1);
-                    writeSaved(updated);
-                    renderSaved();
-                    say('Saved prompt removed.');
-                });
-
-                actions.appendChild(copy);
-                actions.appendChild(remove);
-                item.appendChild(actions);
-                savedList.appendChild(item);
-            });
-            savedEmpty.classList.toggle('is-hidden', list.length > 0);
+            progress.value = done.length;
+            text.textContent = done.length + ' of ' + boxes.length + ' steps done' +
+                (done.length === boxes.length ? ' - your art is much better protected.' : '');
+            return done;
         }
 
-        saveButton.addEventListener('click', function () {
-            if (!current) {
-                return;
-            }
-            var list = readSaved().filter(function (text) {
-                return text !== current;
+        Array.prototype.forEach.call(boxes, function (box) {
+            box.checked = saved.indexOf(box.getAttribute('data-step')) !== -1;
+            box.addEventListener('change', function () {
+                writeSteps(update());
             });
-            list.unshift(current);
-            if (writeSaved(list.slice(0, 8))) {
-                renderSaved();
-                say('Prompt saved in this browser.');
-            } else {
-                say('Saving is not available in this browser (private mode?).');
-            }
         });
+        update();
 
-        renderSaved();
-        build();
+        document.getElementById('shield-reset').addEventListener('click', function () {
+            Array.prototype.forEach.call(boxes, function (box) {
+                box.checked = false;
+            });
+            writeSteps(update());
+        });
     }
 
     ready(function () {
@@ -540,6 +467,7 @@
         initAnchorHighlight();
         initUploadForm();
         initToasts();
-        initPromptLab();
+        initQuiz();
+        initChecklist();
     });
 })();

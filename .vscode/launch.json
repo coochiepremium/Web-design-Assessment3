@@ -1,0 +1,27 @@
+{
+  // Press F5 (Run > Start Debugging) to build and launch the website with the debugger.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "AI Unmasked (launch website)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/AICreativeArts/bin/Debug/net8.0/AICreativeArts.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/AICreativeArts",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:7113;http://localhost:5280"
+      },
+      "sourceFileMap": {
+        "/Views": "${workspaceFolder}/AICreativeArts/Views"
+      }
+    }
+  ]
+}

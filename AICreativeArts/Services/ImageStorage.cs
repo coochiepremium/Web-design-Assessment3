@@ -15,9 +15,6 @@ public interface IImageStorage
 
     /// <summary>Deletes a stored file. Never throws; returns false when the file could not be removed.</summary>
     bool Delete(string? filename);
-
-    /// <summary>Copies a file into the uploads folder if it is not already there (used for sample data).</summary>
-    void EnsureCopied(string sourcePath);
 }
 
 public partial class ImageStorage : IImageStorage
@@ -113,23 +110,6 @@ public partial class ImageStorage : IImageStorage
         {
             _logger.LogWarning(ex, "Could not delete image file {Filename}", filename);
             return false;
-        }
-    }
-
-    public void EnsureCopied(string sourcePath)
-    {
-        try
-        {
-            Directory.CreateDirectory(_folder);
-            var target = Path.Combine(_folder, Path.GetFileName(sourcePath));
-            if (!File.Exists(target) && File.Exists(sourcePath))
-            {
-                File.Copy(sourcePath, target);
-            }
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            _logger.LogWarning(ex, "Could not copy sample image {Source}", sourcePath);
         }
     }
 

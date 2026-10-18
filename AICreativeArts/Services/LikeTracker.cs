@@ -19,7 +19,7 @@ public interface ILikeTracker
 
 public class SessionLikeTracker : ILikeTracker
 {
-    private const string SessionKey = "MuseAI.LikedImageIds";
+    private const string SessionKey = "AIUnmasked.LikedImageIds";
 
     private readonly IHttpContextAccessor _httpContextAccessor;
 

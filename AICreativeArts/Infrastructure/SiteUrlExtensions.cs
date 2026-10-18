@@ -10,7 +10,7 @@ public static class SiteUrlExtensions
     {
         if (string.IsNullOrWhiteSpace(filename))
         {
-            return url.Content("~/img/image-unavailable.jpg");
+            return "";
         }
 
         var folder = url.ActionContext.HttpContext.RequestServices

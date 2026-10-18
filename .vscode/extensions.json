@@ -1,0 +1,9 @@
+{
+  // VS Code offers to install these when you open the folder.
+  "recommendations": [
+    "ms-dotnettools.csdevkit",
+    "ms-dotnettools.csharp",
+    "ms-dotnettools.vscode-dotnet-runtime",
+    "qwtel.sqlite-viewer"
+  ]
+}

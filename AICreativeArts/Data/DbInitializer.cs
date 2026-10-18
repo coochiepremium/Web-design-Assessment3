@@ -1,15 +1,16 @@
 using AICreativeArts.Authorization;
 using AICreativeArts.Infrastructure;
-using AICreativeArts.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace AICreativeArts.Data;
 
 /// <summary>
-/// Prepares the database when the site starts: applies EF Core migrations, creates
-/// the Admin role, the seed accounts and copies the sample gallery images.
+/// Prepares the database when the site starts: applies EF Core migrations, then
+/// creates the Admin role and the seed accounts listed in appsettings.json.
+/// The AI image gallery starts empty - members add images through the Create page.
 /// </summary>
 public static class DbInitializer
 {
@@ -22,6 +23,7 @@ public static class DbInitializer
         try
         {
             var db = provider.GetRequiredService<ApplicationDbContext>();
+            await ReplaceOutdatedDevelopmentDatabaseAsync(db, provider.GetRequiredService<IWebHostEnvironment>(), logger);
             await db.Database.MigrateAsync();
 
             await EnsureRolesAsync(provider.GetRequiredService<RoleManager<IdentityRole>>(), logger);
@@ -29,9 +31,6 @@ public static class DbInitializer
                 provider.GetRequiredService<UserManager<IdentityUser>>(),
                 provider.GetRequiredService<IOptions<SeedAccountOptions>>().Value,
                 logger);
-
-            var storedFilenames = await db.AIImages.Select(i => i.Filename).ToListAsync();
-            CopySampleImages(storedFilenames, provider.GetRequiredService<IWebHostEnvironment>(), provider.GetRequiredService<IImageStorage>());
         }
         catch (Exception ex)
         {
@@ -39,6 +38,51 @@ public static class DbInitializer
             // and the log explains what went wrong.
             logger.LogCritical(ex, "The database could not be initialised.");
         }
+    }
+
+    /// <summary>
+    /// A database created by an earlier version of this project contains migrations this
+    /// version no longer has, so applying the current migrations would fail. In Development
+    /// the old SQLite file is renamed to app.db.bak-{time} (nothing is deleted) and a fresh
+    /// database is created; in other environments the problem is only logged.
+    /// </summary>
+    private static async Task ReplaceOutdatedDevelopmentDatabaseAsync(ApplicationDbContext db, IWebHostEnvironment environment, ILogger logger)
+    {
+        if (!db.Database.IsSqlite() || !await db.Database.CanConnectAsync())
+        {
+            return;
+        }
+
+        var known = db.Database.GetMigrations().ToHashSet(StringComparer.Ordinal);
+        var unknown = (await db.Database.GetAppliedMigrationsAsync()).Where(m => !known.Contains(m)).ToList();
+        if (unknown.Count == 0)
+        {
+            return;
+        }
+
+        var dataSource = new SqliteConnectionStringBuilder(db.Database.GetConnectionString()).DataSource;
+        if (!environment.IsDevelopment() || string.IsNullOrEmpty(dataSource) || dataSource == ":memory:")
+        {
+            logger.LogCritical("The database was created by an older version of the site (unknown migrations: {Migrations}). Delete {DataSource} so it can be recreated.",
+                string.Join(", ", unknown), dataSource);
+            return;
+        }
+
+        await db.Database.CloseConnectionAsync();
+        SqliteConnection.ClearAllPools();
+
+        var path = Path.GetFullPath(dataSource);
+        var backup = $"{path}.bak-{DateTime.Now:yyyyMMddHHmmss}";
+        File.Move(path, backup);
+        foreach (var suffix in new[] { "-shm", "-wal" })
+        {
+            if (File.Exists(path + suffix))
+            {
+                File.Move(path + suffix, backup + suffix);
+            }
+        }
+
+        logger.LogWarning("The database was created by an older version of the site, so it was renamed to {Backup} and a new one will be created.", backup);
     }
 
     private static async Task EnsureRolesAsync(RoleManager<IdentityRole> roleManager, ILogger logger)
@@ -71,22 +115,6 @@ public static class DbInitializer
                 var added = await userManager.AddToRoleAsync(user, account.Role);
                 LogResult(added, logger, $"role {account.Role} for {account.Email}");
             }
-        }
-    }
-
-    /// <summary>Restores the sample files for sample rows that still exist (uploads are not kept in source control).</summary>
-    private static void CopySampleImages(IEnumerable<string> storedFilenames, IWebHostEnvironment environment, IImageStorage storage)
-    {
-        var folder = Path.Combine(environment.WebRootPath, SampleData.SampleFolder);
-        if (!Directory.Exists(folder))
-        {
-            return;
-        }
-
-        var stored = storedFilenames.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        foreach (var image in SampleData.Images.Where(i => stored.Contains(i.Filename)))
-        {
-            storage.EnsureCopied(Path.Combine(folder, image.Filename));
         }
     }
 

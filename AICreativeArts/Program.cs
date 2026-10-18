@@ -29,7 +29,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Identity/Account/Login";
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-    options.Cookie.Name = ".MuseAI.Auth";
+    options.Cookie.Name = ".AIUnmasked.Auth";
 
     // One like per image per login: forget the likes whenever the user signs in or out.
     options.Events.OnSignedIn = context =>
@@ -47,7 +47,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.Cookie.Name = ".MuseAI.Session";
+    options.Cookie.Name = ".AIUnmasked.Session";
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
     options.IdleTimeout = TimeSpan.FromHours(4);
@@ -56,10 +56,12 @@ builder.Services.AddSession(options =>
 builder.Services.Configure<SiteOptions>(builder.Configuration.GetSection(SiteOptions.SectionName));
 builder.Services.Configure<UploadOptions>(builder.Configuration.GetSection(UploadOptions.SectionName));
 builder.Services.Configure<SeedAccountOptions>(builder.Configuration.GetSection(SeedAccountOptions.SectionName));
+builder.Services.Configure<ImageCreditOptions>(builder.Configuration.GetSection(ImageCreditOptions.SectionName));
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ILikeTracker, SessionLikeTracker>();
 builder.Services.AddScoped<IImageStorage, ImageStorage>();
+builder.Services.AddSingleton<IMediaLibrary, MediaLibrary>();
 
 builder.Services.AddControllersWithViews(options =>
 {

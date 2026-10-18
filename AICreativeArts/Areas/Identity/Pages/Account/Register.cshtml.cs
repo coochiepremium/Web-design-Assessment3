@@ -76,7 +76,7 @@ public class RegisterModel : PageModel
         {
             _logger.LogInformation("User {Email} created a new account.", Input.Email);
             await _signInManager.SignInAsync(user, isPersistent: false);
-            TempData["SiteMessage"] = "Welcome to MuseAI! Your account is ready, so you can now upload AI images.";
+            TempData["SiteMessage"] = "Welcome to AI Unmasked! Your account is ready, so you can now upload AI images.";
             return LocalRedirect(ReturnUrl);
         }
 

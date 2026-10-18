@@ -5,16 +5,16 @@ using Xunit;
 namespace AICreativeArts.Tests;
 
 /// <summary>Checks the visitor / member / admin rules from the assessment brief.</summary>
-public class AccessControlTests : IClassFixture<MuseAIFactory>
+public class AccessControlTests : IClassFixture<SiteFactory>
 {
-    private readonly MuseAIFactory _factory;
+    private readonly SiteFactory _factory;
 
-    public AccessControlTests(MuseAIFactory factory) => _factory = factory;
+    public AccessControlTests(SiteFactory factory) => _factory = factory;
 
     [Theory]
     [InlineData("/")]
     [InlineData("/Home/Contact")]
-    [InlineData("/Home/PromptLab")]
+    [InlineData("/Home/ArtistShield")]
     [InlineData("/AIImages")]
     [InlineData("/Identity/Account/Login")]
     [InlineData("/Identity/Account/Register")]
@@ -67,15 +67,16 @@ public class AccessControlTests : IClassFixture<MuseAIFactory>
 
     [Theory]
     [InlineData("/AIImages/Create")]
-    [InlineData("/AIImages/Details/1")]
-    [InlineData("/AIImages/Edit/1")]
-    [InlineData("/AIImages/Delete/1")]
+    [InlineData("/AIImages/Details/{id}")]
+    [InlineData("/AIImages/Edit/{id}")]
+    [InlineData("/AIImages/Delete/{id}")]
     public async Task Admin_can_open_every_page(string url)
     {
+        var id = await _factory.AddImageAsync("Admin Page Check");
         var browser = _factory.CreateBrowser();
         await browser.LoginAsync(BrowserExtensions.AdminEmail, BrowserExtensions.AdminPassword);
 
-        var response = await browser.GetAsync(url);
+        var response = await browser.GetAsync(url.Replace("{id}", id.ToString()));
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
@@ -83,6 +84,7 @@ public class AccessControlTests : IClassFixture<MuseAIFactory>
     [Fact]
     public async Task Buttons_match_the_viewer_role()
     {
+        var id = await _factory.AddImageAsync("Button Check");
         var visitorHtml = await _factory.CreateBrowser().GetStringAsync("/AIImages");
         Assert.DoesNotContain("like-form", visitorHtml);
 
@@ -97,8 +99,8 @@ public class AccessControlTests : IClassFixture<MuseAIFactory>
         await admin.LoginAsync(BrowserExtensions.AdminEmail, BrowserExtensions.AdminPassword);
         var adminHtml = await admin.GetStringAsync("/AIImages");
         Assert.Contains("like-form", adminHtml);
-        Assert.Contains("/AIImages/Edit/1", adminHtml);
-        Assert.Contains("/AIImages/Delete/1", adminHtml);
+        Assert.Contains($"/AIImages/Edit/{id}", adminHtml);
+        Assert.Contains($"/AIImages/Delete/{id}", adminHtml);
     }
 
     [Theory]

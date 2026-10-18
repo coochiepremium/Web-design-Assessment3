@@ -1,0 +1,14 @@
+@model IReadOnlyList<CaseExample>
+
+@* Each square shows an image slot (or its placeholder). site.js builds the mouse-over
+   caption from the data-* attributes; a click opens the source in a new tab. *@
+<div class="tool-tiles">
+    @foreach (var example in Model)
+    {
+        <a class="tool-tile" href="@example.Url" target="_blank" rel="noopener noreferrer"
+           data-hover-title="@example.Name" data-hover-text="@example.HoverText" data-hover-source="@example.Source"
+           aria-label="@example.Name: @example.HoverText (@example.Source). Opens the source in a new tab.">
+            <image-slot key="@example.SlotKey" class="tool-tile-image" />
+        </a>
+    }
+</div>

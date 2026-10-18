@@ -1,0 +1,44 @@
+{
+  // Terminal > Run Task... lists these. "build" also runs before every F5 debug session.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["build", "${workspaceFolder}/AICreativeArts.sln", "/property:GenerateFullPaths=true", "/consoleloggerparameters:NoSummary"],
+      "problemMatcher": "$msCompile",
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "watch (run with hot reload)",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["watch", "run", "--project", "${workspaceFolder}/AICreativeArts/AICreativeArts.csproj", "--launch-profile", "https"],
+      "problemMatcher": "$msCompile",
+      "isBackground": true
+    },
+    {
+      "label": "test",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["test", "${workspaceFolder}/AICreativeArts.sln"],
+      "problemMatcher": "$msCompile",
+      "group": { "kind": "test", "isDefault": true }
+    },
+    {
+      "label": "trust HTTPS development certificate",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["dev-certs", "https", "--trust"],
+      "problemMatcher": []
+    },
+    {
+      "label": "ef: update database",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["ef", "database", "update", "--project", "${workspaceFolder}/AICreativeArts/AICreativeArts.csproj"],
+      "problemMatcher": []
+    }
+  ]
+}

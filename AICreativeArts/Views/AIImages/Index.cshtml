@@ -17,12 +17,13 @@
         <div class="message-card">
             <i class="fa-solid fa-images message-icon" aria-hidden="true"></i>
             <h2 class="form-heading">The gallery is empty</h2>
-            <p class="message-text">No AI images have been uploaded yet. Be the first to share your creation!</p>
+            <p class="message-text">No AI images have been uploaded yet. Members can add examples of AI-generated images, with the prompt and tool used, so visitors can learn to recognise machine-made art.</p>
         </div>
     </section>
 }
 else
 {
+    <h2 class="visually-hidden">Uploaded AI images, most liked first</h2>
     <div class="image-list">
         @foreach (var item in Model)
         {
@@ -33,14 +34,14 @@ else
                     {
                         <a class="image-media-link" asp-action="Details" asp-route-id="@item.Id" title="View details">
                             <img class="image-photo" src="@Url.UploadedImage(item.Filename)" alt="@item.Prompt" loading="lazy"
-                                 data-fallback="@Url.Content("~/img/image-unavailable.jpg")" />
+                                 data-image-fallback />
                             <span class="visually-hidden">View details for this image</span>
                         </a>
                     }
                     else
                     {
                         <img class="image-photo" src="@Url.UploadedImage(item.Filename)" alt="@item.Prompt" loading="lazy"
-                             data-fallback="@Url.Content("~/img/image-unavailable.jpg")" />
+                             data-image-fallback />
                     }
                 </div>
 

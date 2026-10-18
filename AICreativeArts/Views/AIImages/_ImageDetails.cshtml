@@ -19,6 +19,5 @@
         <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Like)</dt>
         <dd class="col-sm-9">@Model.Like</dd>
     </dl>
-    <img class="detail-thumb" src="@Url.UploadedImage(Model.Filename)" alt="@Model.Prompt"
-         data-fallback="@Url.Content("~/img/image-unavailable.jpg")" />
+    <img class="detail-thumb" src="@Url.UploadedImage(Model.Filename)" alt="@Model.Prompt" data-image-fallback />
 </div>

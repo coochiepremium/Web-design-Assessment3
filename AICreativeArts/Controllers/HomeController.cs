@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace AICreativeArts.Controllers;
 
-/// <summary>Public pages: Home, Contact, the Prompt Lab and the friendly error pages.</summary>
+/// <summary>Public pages: Home, Contact, Artist Shield and the friendly error pages.</summary>
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
@@ -23,8 +23,8 @@ public class HomeController : Controller
 
     public IActionResult Contact() => View(_site);
 
-    /// <summary>The additional creative page: an interactive AI art prompt builder.</summary>
-    public IActionResult PromptLab() => View();
+    /// <summary>The additional creative page: a quiz, a protection checklist and a timeline for artists.</summary>
+    public IActionResult ArtistShield() => View();
 
     [IgnoreAntiforgeryToken]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -51,6 +51,14 @@ public class HomeController : Controller
         }
 
         Response.StatusCode = code is >= 400 and < 600 ? code : 500;
+
+        // Missing files (an image slot not filled yet, a deleted upload) get a plain status
+        // code: the browser asked for an image or script, not a page.
+        if (Path.HasExtension(feature.OriginalPath))
+        {
+            return new StatusCodeResult(Response.StatusCode);
+        }
+
         return View(StatusCodeViewModel.For(code, feature.OriginalPath));
     }
 }

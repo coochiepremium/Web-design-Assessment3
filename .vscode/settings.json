@@ -1,0 +1,10 @@
+{
+  "dotnet.defaultSolution": "AICreativeArts.sln",
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true
+  },
+  "search.exclude": {
+    "**/wwwroot/lib": true
+  }
+}

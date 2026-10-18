@@ -26,8 +26,6 @@ public class ApplicationDbContext : IdentityDbContext
 
             // The gallery is always listed by popularity, so index the sort column.
             entity.HasIndex(i => i.Like);
-
-            entity.HasData(SampleData.Images);
         });
     }
 }

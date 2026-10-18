@@ -1,106 +1,112 @@
 namespace AICreativeArts.Content;
 
 /// <summary>
-/// Researched copy for the home page (theme: AI in Creative Arts). Keeping it in one
-/// place keeps the Razor views free of long strings and lets the Contact page list
-/// every source automatically.
+/// Researched copy for the home page (theme: the harmful side of AI in the creative arts).
+/// Keeping it in one place keeps the Razor views free of long strings and lets the
+/// Contact page list every source automatically.
 /// </summary>
 public static class SiteContent
 {
-    public const string HeroTitle = "AI in Creative Arts";
+    public const string HeroEyebrow = "Content warning: the hidden cost of generative AI";
+
+    public const string HeroTitle = "The Dark Side of AI Art";
 
     public const string HeroText =
-        "Creative artificial intelligence is the use of machine learning models to generate or transform " +
-        "art, music and literature, often in response to text prompts. These models learn the patterns of " +
-        "style, composition, melody and language in their training data and then produce new works that " +
-        "artists can refine, remix and make their own.";
+        "Generative AI can produce a painting, a song or a story in seconds, but that speed comes at a cost. " +
+        "These systems are trained on millions of human-made works, often without consent, credit or payment, " +
+        "and they now compete with the very artists whose work made them possible, while making convincing " +
+        "fakes easier than ever.";
 
     public const string HeroSource = "Adapted from Wikipedia";
+
+    public const string HeroSourceUrl = "https://en.wikipedia.org/wiki/AI_art";
 
     public static IReadOnlyList<FeatureSection> Sections { get; } = new List<FeatureSection>
     {
         new(
-            Id: "ai-art-generators",
-            Title: "AI Art Generators",
+            Id: "art-without-consent",
+            CaseLabel: "Case 01 · Consent & copyright",
+            Title: "Art Without Consent",
             Description:
-                "AI art generators are apps that turn a written description, called a prompt, into paintings, " +
-                "illustrations or photorealistic images using text-to-image models, such as diffusion models, " +
-                "trained on huge collections of captioned images.",
-            ReadMoreUrl: "https://en.wikipedia.org/wiki/Text-to-image_model",
+                "Many leading image generators, such as Stable Diffusion, were trained on billions of pictures " +
+                "scraped from the internet, including copyrighted artwork, mostly without the artists' permission, " +
+                "credit or payment.",
+            KeyFact: "5.85 billion image–text pairs were collected for the LAION-5B training dataset.",
+            ReadMoreUrl: "https://en.wikipedia.org/wiki/Artificial_intelligence_and_copyright",
             TextFirst: true,
-            Tools: new List<CreativeTool>
+            Examples: new List<CaseExample>
             {
-                new("Midjourney", "~/img/tools/midjourney.jpg",
-                    "Midjourney is a generative artificial intelligence program that creates images from natural " +
-                    "language descriptions, called prompts, developed by the San Francisco-based lab Midjourney, Inc.",
-                    "Wikipedia", "https://www.midjourney.com/"),
-                new("Adobe Firefly", "~/img/tools/adobe-firefly.jpg",
-                    "Adobe Firefly is a family of generative AI models from Adobe that creates and edits images " +
-                    "from text prompts, and is built into Photoshop and Illustrator.",
-                    "Wikipedia", "https://www.adobe.com/products/firefly.html"),
+                new("LAION-5B", "tile-laion",
+                    "LAION-5B is an open dataset of about 5.85 billion image–text pairs scraped from the web, " +
+                    "released in 2022 and used to train image generators such as Stable Diffusion.",
+                    "LAION", "https://laion.ai/blog/laion-5b/"),
+                new("Getty Images v Stability AI", "tile-getty",
+                    "In 2023 Getty Images sued Stability AI, claiming it copied over 12 million Getty photos without " +
+                    "permission to train Stable Diffusion. A UK court largely sided with Stability in 2025; a US case continues.",
+                    "Wikipedia", "https://en.wikipedia.org/wiki/Stability_AI"),
             }),
         new(
-            Id: "ai-music-composition",
-            Title: "AI Music Composition",
+            Id: "livelihoods-at-risk",
+            CaseLabel: "Case 02 · Jobs & income",
+            Title: "Livelihoods at Risk",
             Description:
-                "AI music tools compose melodies, harmonies and complete songs from a text description or a short " +
-                "musical idea, helping musicians sketch film scores, explore new genres and produce royalty-free " +
-                "background music.",
-            ReadMoreUrl: "https://en.wikipedia.org/wiki/Music_and_artificial_intelligence",
+                "Some studios, publishers and game companies have turned to AI to cut costs, reducing work for " +
+                "illustrators, voice actors and writers, or paying them less to fix machine output.",
+            KeyFact: "118 days: the 2023 SAG-AFTRA actors' strike, fought partly over AI digital replicas.",
+            ReadMoreUrl: "https://en.wikipedia.org/wiki/Generative_AI",
             TextFirst: false,
-            Tools: new List<CreativeTool>
+            Examples: new List<CaseExample>
             {
-                new("Suno", "~/img/tools/suno.jpg",
-                    "Suno is a generative AI music program that creates realistic songs combining vocals and " +
-                    "instrumentation from a short text prompt. It has been widely available since December 2023.",
-                    "Wikipedia", "https://suno.com/"),
-                new("AIVA", "~/img/tools/aiva.jpg",
-                    "AIVA (Artificial Intelligence Virtual Artist) is an AI composer created in 2016 that writes " +
-                    "classical and symphonic soundtracks, and is recognised by the music rights society SACEM.",
-                    "Wikipedia", "https://www.aiva.ai/"),
+                new("2023 Writers Guild of America strike", "tile-wga",
+                    "The 2023 Writers Guild of America strike lasted 148 days and won rules that AI cannot write " +
+                    "or rewrite literary material, and that AI-generated text cannot count as source material.",
+                    "Wikipedia", "https://en.wikipedia.org/wiki/2023_Writers_Guild_of_America_strike"),
+                new("2023 SAG-AFTRA strike", "tile-sag",
+                    "The 2023 SAG-AFTRA strike lasted 118 days; actors won rules requiring their consent and " +
+                    "payment before studios create or use digital replicas of their faces and voices.",
+                    "Wikipedia", "https://en.wikipedia.org/wiki/2023_SAG-AFTRA_strike"),
             }),
         new(
-            Id: "ai-creative-writing",
-            Title: "AI Creative Writing",
+            Id: "fakes-and-deception",
+            CaseLabel: "Case 03 · Authenticity",
+            Title: "Fakes and Deception",
             Description:
-                "AI writing assistants use large language models to help authors brainstorm plots, draft poems, " +
-                "scripts and short stories, and revise their work for style and tone, acting as a creative " +
-                "partner for human writers.",
-            ReadMoreUrl: "https://en.wikipedia.org/wiki/Large_language_model",
+                "Voice cloning and image generators make it easy to imitate a singer, actor or painter, " +
+                "flooding platforms with convincing fakes that mislead audiences and damage reputations.",
+            KeyFact: "'Heart on My Sleeve' gained millions of plays in under two weeks before it was taken down.",
+            ReadMoreUrl: "https://en.wikipedia.org/wiki/Deepfake",
             TextFirst: true,
-            Tools: new List<CreativeTool>
+            Examples: new List<CaseExample>
             {
-                new("Sudowrite", "~/img/tools/sudowrite.jpg",
-                    "Sudowrite is an AI writing partner built for fiction authors, helping novelists brainstorm " +
-                    "ideas, describe scenes and expand their drafts while keeping their own voice.",
-                    "Sudowrite", "https://www.sudowrite.com/"),
-                new("NovelAI", "~/img/tools/novelai.jpg",
-                    "NovelAI is a subscription service for AI-assisted storytelling and text-to-image synthesis, " +
-                    "first launched in beta in June 2021.",
-                    "Wikipedia", "https://novelai.net/"),
+                new("Heart on My Sleeve", "tile-heart",
+                    "In April 2023 'Heart on My Sleeve', a song using AI-cloned voices of Drake and The Weeknd, " +
+                    "went viral before Universal Music Group had it removed from streaming services.",
+                    "Wikipedia", "https://en.wikipedia.org/wiki/Heart_on_My_Sleeve_(Ghostwriter977_song)"),
+                new("Théâtre D'opéra Spatial", "tile-theatre",
+                    "In 2022 a Midjourney image won first place in a digital arts category at the Colorado State " +
+                    "Fair, angering artists; in 2023 the US Copyright Office refused to register it.",
+                    "Wikipedia", "https://en.wikipedia.org/wiki/Th%C3%A9%C3%A2tre_D%27op%C3%A9ra_Spatial"),
             }),
     };
 
     /// <summary>Every external text source used on the site, credited on the Contact page.</summary>
     public static IReadOnlyList<(string Title, string Url)> TextSources { get; } = new List<(string, string)>
     {
-        ("Wikipedia – Artificial intelligence art", "https://en.wikipedia.org/wiki/Artificial_intelligence_art"),
-        ("Wikipedia – Text-to-image model", "https://en.wikipedia.org/wiki/Text-to-image_model"),
-        ("Wikipedia – Midjourney", "https://en.wikipedia.org/wiki/Midjourney"),
-        ("Wikipedia – Adobe Firefly", "https://en.wikipedia.org/wiki/Adobe_Firefly"),
-        ("Wikipedia – Music and artificial intelligence", "https://en.wikipedia.org/wiki/Music_and_artificial_intelligence"),
-        ("Wikipedia – Suno AI", "https://en.wikipedia.org/wiki/Suno_AI"),
-        ("Wikipedia – AIVA", "https://en.wikipedia.org/wiki/AIVA"),
-        ("Wikipedia – Large language model", "https://en.wikipedia.org/wiki/Large_language_model"),
-        ("Wikipedia – NovelAI", "https://en.wikipedia.org/wiki/NovelAI"),
-        ("Sudowrite – official website", "https://www.sudowrite.com/"),
-        ("Wikipedia – AARON", "https://en.wikipedia.org/wiki/AARON"),
-        ("Wikipedia – Experiments in Musical Intelligence", "https://en.wikipedia.org/wiki/Experiments_in_Musical_Intelligence"),
-        ("Wikipedia – DeepDream", "https://en.wikipedia.org/wiki/DeepDream"),
-        ("Wikipedia – Edmond de Belamy", "https://en.wikipedia.org/wiki/Edmond_de_Belamy"),
-        ("Wikipedia – DALL-E", "https://en.wikipedia.org/wiki/DALL-E"),
+        ("Wikipedia – AI art", HeroSourceUrl),
+        ("Wikipedia – Artificial intelligence and copyright", "https://en.wikipedia.org/wiki/Artificial_intelligence_and_copyright"),
+        ("LAION – LAION-5B announcement", "https://laion.ai/blog/laion-5b/"),
         ("Wikipedia – Stable Diffusion", "https://en.wikipedia.org/wiki/Stable_Diffusion"),
+        ("Wikipedia – Stability AI (Getty Images lawsuit)", "https://en.wikipedia.org/wiki/Stability_AI"),
+        ("Wikipedia – Generative AI (impact on creative jobs)", "https://en.wikipedia.org/wiki/Generative_AI"),
+        ("Wikipedia – 2023 Writers Guild of America strike", "https://en.wikipedia.org/wiki/2023_Writers_Guild_of_America_strike"),
+        ("Wikipedia – 2023 SAG-AFTRA strike", "https://en.wikipedia.org/wiki/2023_SAG-AFTRA_strike"),
+        ("Wikipedia – Deepfake", "https://en.wikipedia.org/wiki/Deepfake"),
+        ("Wikipedia – Heart on My Sleeve (Ghostwriter977 song)", "https://en.wikipedia.org/wiki/Heart_on_My_Sleeve_(Ghostwriter977_song)"),
         ("Wikipedia – Théâtre D'opéra Spatial", "https://en.wikipedia.org/wiki/Th%C3%A9%C3%A2tre_D%27op%C3%A9ra_Spatial"),
-        ("Wikipedia – Sora (text-to-video model)", "https://en.wikipedia.org/wiki/Sora_(text-to-video_model)"),
+        ("Glaze – University of Chicago", "https://glaze.cs.uchicago.edu/"),
+        ("Nightshade – University of Chicago", "https://nightshade.cs.uchicago.edu/"),
+        ("OpenAI – GPTBot documentation", "https://platform.openai.com/docs/gptbot"),
+        ("Wikipedia – Artificial Intelligence Act (EU)", "https://en.wikipedia.org/wiki/Artificial_Intelligence_Act"),
+        ("US Copyright Office – Copyright and Artificial Intelligence", "https://www.copyright.gov/ai/"),
     };
 }
