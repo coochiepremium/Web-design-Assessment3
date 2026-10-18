@@ -304,6 +304,25 @@ code {
     background-color: var(--crimson);
 }
 
+/* "Hello name!" never wraps; very long email addresses are shortened with an ellipsis. */
+.navbar-account .nav-link {
+    white-space: nowrap;
+}
+
+.account-name {
+    display: inline-block;
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+}
+
+/* Shown instead of "Hello ... !" only where the menu is tight (576-767px). */
+.account-icon {
+    display: none;
+    color: var(--hazard);
+}
+
 .navbar-account .btn-link {
     border: 0;
     text-decoration: none;
@@ -862,7 +881,7 @@ code {
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 2vw;
     margin: 0;
-    padding: 2.5vw 3vw 1vw;
+    padding: 2.5vw 2vw 1vw;
     list-style: none;
 }
 
@@ -886,6 +905,8 @@ code {
 .upload-tile-label {
     position: relative;
     z-index: 1;
+    max-width: 100%;
+    overflow-wrap: anywhere;
     transition: opacity 2s ease;
 }
 
@@ -993,6 +1014,7 @@ code {
 
 /* Row backgrounds (brief): orange and blue gradients, alternating. */
 .image-content {
+    min-width: 0;
     padding: 1.6vw 2.5vw 2vw;
     background: linear-gradient(to bottom, #ff9933, #ffe6cc, white, white);
     color: var(--ink);
@@ -1014,6 +1036,7 @@ code {
     text-align: center;
     text-shadow: 2px 2px 0px white, 2px 2px 4px navy;
     text-transform: uppercase;
+    overflow-wrap: anywhere;
 }
 
 /* Row text (brief): Arial, black, 1vw. */
@@ -1023,6 +1046,7 @@ code {
     font-family: Arial, sans-serif;
     font-size: 1vw;
     line-height: 1.6;
+    overflow-wrap: anywhere;
 }
 
 .image-meta,
@@ -1148,7 +1172,10 @@ code {
     object-fit: cover;
 }
 
-.image-preview-img[hidden],
+.image-preview .image-slot {
+    display: flex;
+}
+
 .image-preview.is-previewing .image-preview-default {
     display: none;
 }
@@ -1868,6 +1895,11 @@ code {
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    overflow-wrap: anywhere;
+}
+
+.site-toast .toast-body span {
+    min-width: 0;
 }
 
 .site-toast .btn-close {
@@ -1888,12 +1920,22 @@ code {
    Without JavaScript everything stays visible. */
 .js .reveal-on-view {
     opacity: 0;
+    transition: opacity 0.9s ease;
+}
+
+/* The slide-up motion is applied to the children, not the observed element itself:
+   moving the observed box would change what IntersectionObserver measures and make
+   a block at the edge of the screen flicker on and off. */
+.js .reveal-on-view > * {
     transform: translateY(40px) scale(0.98);
-    transition: opacity 0.9s ease, transform 0.9s ease;
+    transition: transform 0.9s ease;
 }
 
 .js .reveal-on-view.is-visible {
     opacity: 1;
+}
+
+.js .reveal-on-view.is-visible > * {
     transform: none;
 }
 
@@ -1938,7 +1980,8 @@ code {
         scroll-behavior: auto;
     }
 
-    .js .reveal-on-view {
+    .js .reveal-on-view,
+    .js .reveal-on-view > * {
         opacity: 1;
         transform: none;
         transition: none;
@@ -2006,6 +2049,53 @@ code {
 
     .shield-grid {
         grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Expanded menu below 992px: the signed-in label shrinks to an icon and a shortened
+   name so the menu always stays on one line, even for an admin. */
+@media (min-width: 576px) and (max-width: 991.98px) {
+    .account-greeting,
+    .role-badge {
+        display: none;
+    }
+
+    .account-icon {
+        display: inline;
+        margin-right: 0.2rem;
+    }
+
+    .account-name {
+        max-width: 7rem;
+    }
+}
+
+/* Tablets (576-767px): the menu keeps its full design (brief), compacted to fit. */
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .site-navbar {
+        padding: 0.3rem 0.5rem;
+    }
+
+    .site-navbar .navbar-brand {
+        gap: 0.25rem;
+        margin-right: 0.3rem;
+        font-size: 0.74rem;
+        letter-spacing: 0;
+    }
+
+    .site-navbar .nav-link {
+        padding: 0.35rem 0.3rem;
+        font-size: 0.74rem;
+        white-space: nowrap;
+    }
+
+    .site-navbar .navbar-nav:first-child .nav-link.active::after {
+        right: 0.3rem;
+        left: 0.3rem;
+    }
+
+    .account-name {
+        max-width: 4rem;
     }
 }
 
@@ -2121,10 +2211,11 @@ code {
 
     .image-photo {
         position: static;
-        flex: 0 0 auto;
+        flex: 1 1 0;
+        min-width: 0;
         width: auto;
         height: 100%;
-        aspect-ratio: 1 / 1;
+        object-fit: cover;
     }
 
     .image-photo--repeat {

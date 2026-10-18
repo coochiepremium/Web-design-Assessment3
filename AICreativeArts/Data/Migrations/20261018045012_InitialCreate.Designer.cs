@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AICreativeArts.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261018040612_InitialCreate")]
+    [Migration("20261018045012_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -52,6 +52,38 @@ namespace AICreativeArts.Data.Migrations
                     b.HasIndex("Like");
 
                     b.ToTable("AIImages", (string)null);
+                });
+
+            modelBuilder.Entity("AICreativeArts.Models.ImageLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AIImageId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LikedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LoginId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AIImageId");
+
+                    b.HasIndex("LoginId", "AIImageId")
+                        .IsUnique();
+
+                    b.ToTable("ImageLikes", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -248,6 +280,17 @@ namespace AICreativeArts.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("AICreativeArts.Models.ImageLike", b =>
+                {
+                    b.HasOne("AICreativeArts.Models.AIImage", "AIImage")
+                        .WithMany()
+                        .HasForeignKey("AIImageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AIImage");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

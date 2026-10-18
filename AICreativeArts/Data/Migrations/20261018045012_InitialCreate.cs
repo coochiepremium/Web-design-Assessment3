@@ -68,6 +68,28 @@ namespace AICreativeArts.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ImageLikes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    AIImageId = table.Column<int>(type: "INTEGER", nullable: false),
+                    LoginId = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", maxLength: 450, nullable: false),
+                    LikedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ImageLikes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ImageLikes_AIImages_AIImageId",
+                        column: x => x.AIImageId,
+                        principalTable: "AIImages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -214,14 +236,22 @@ namespace AICreativeArts.Data.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ImageLikes_AIImageId",
+                table: "ImageLikes",
+                column: "AIImageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ImageLikes_LoginId_AIImageId",
+                table: "ImageLikes",
+                columns: new[] { "LoginId", "AIImageId" },
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "AIImages");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -238,10 +268,16 @@ namespace AICreativeArts.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "ImageLikes");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "AIImages");
         }
     }
 }

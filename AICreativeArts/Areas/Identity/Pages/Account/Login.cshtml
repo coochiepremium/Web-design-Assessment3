@@ -28,10 +28,10 @@
                         <label class="form-check-label" asp-for="Input.RememberMe">@Html.DisplayNameFor(m => m.Input.RememberMe)</label>
                     </div>
                     <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+                    @* No email service is configured, so the "forgot password" and "resend confirmation"
+                       links of the default template are left out (they could never send an email). *@
                     <ul class="account-links">
-                        <li><a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a></li>
                         <li><a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a></li>
-                        <li><a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a></li>
                     </ul>
                 </form>
             </section>

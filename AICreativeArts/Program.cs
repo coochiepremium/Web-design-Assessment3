@@ -1,4 +1,6 @@
+using AICreativeArts.Authorization;
 using AICreativeArts.Data;
+using AICreativeArts.Filters;
 using AICreativeArts.Infrastructure;
 using AICreativeArts.Services;
 using Microsoft.AspNetCore.Identity;
@@ -31,26 +33,23 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
     options.Cookie.Name = ".AIUnmasked.Auth";
 
-    // One like per image per login: forget the likes whenever the user signs in or out.
-    options.Events.OnSignedIn = context =>
+    // One like per image per login: every sign-in gets a new login id claim, and likes
+    // are recorded against it (see Services/LikeTracker.cs).
+    options.Events.OnSigningIn = context =>
     {
-        context.HttpContext.RequestServices.GetRequiredService<ILikeTracker>().Reset();
-        return Task.CompletedTask;
-    };
-    options.Events.OnSigningOut = context =>
-    {
-        context.HttpContext.RequestServices.GetRequiredService<ILikeTracker>().Reset();
+        LoginSession.AddLoginId(context.Principal);
         return Task.CompletedTask;
     };
 });
 
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
+// Identity rebuilds the sign-in cookie every 30 minutes; keep the same login id when it does.
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
 {
-    options.Cookie.Name = ".AIUnmasked.Session";
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    options.IdleTimeout = TimeSpan.FromHours(4);
+    options.OnRefreshingPrincipal = context =>
+    {
+        LoginSession.CopyLoginId(context.CurrentPrincipal, context.NewPrincipal);
+        return Task.CompletedTask;
+    };
 });
 
 builder.Services.Configure<SiteOptions>(builder.Configuration.GetSection(SiteOptions.SectionName));
@@ -59,7 +58,7 @@ builder.Services.Configure<SeedAccountOptions>(builder.Configuration.GetSection(
 builder.Services.Configure<ImageCreditOptions>(builder.Configuration.GetSection(ImageCreditOptions.SectionName));
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ILikeTracker, SessionLikeTracker>();
+builder.Services.AddScoped<ILikeTracker, LoginLikeTracker>();
 builder.Services.AddScoped<IImageStorage, ImageStorage>();
 builder.Services.AddSingleton<IMediaLibrary, MediaLibrary>();
 
@@ -67,6 +66,9 @@ builder.Services.AddControllersWithViews(options =>
 {
     // Every POST/PUT/DELETE must carry a valid antiforgery token.
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+
+    // Built-in Identity pages that throw or return plain-text errors fail politely instead.
+    options.Filters.Add<IdentityPageGuardFilter>();
 });
 builder.Services.AddRazorPages();
 
@@ -101,7 +103,6 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseSession();
 
 app.MapControllerRoute(
     name: "default",

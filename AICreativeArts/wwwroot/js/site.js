@@ -225,8 +225,18 @@
         }
 
         var figure = document.querySelector(input.getAttribute('data-preview'));
-        var chosen = figure ? figure.querySelector('.image-preview-chosen') : null;
         var caption = figure ? figure.querySelector('figcaption') : null;
+        var chosen = null;
+
+        // The live preview image is produced here, the first time a file is chosen.
+        function previewImage() {
+            if (!chosen && figure) {
+                chosen = createElement('img', 'image-preview-img image-preview-chosen');
+                chosen.alt = 'Preview of the image you chose';
+                figure.insertBefore(chosen, caption);
+            }
+            return chosen;
+        }
         var defaultCaption = caption ? caption.getAttribute('data-default-caption') : '';
         var message = document.querySelector('[data-valmsg-for="' + input.name + '"]');
         var maxBytes = parseInt(input.getAttribute('data-max-bytes'), 10) || 5 * 1024 * 1024;
@@ -248,8 +258,8 @@
                 objectUrl = null;
             }
             if (chosen) {
-                chosen.hidden = true;
-                chosen.removeAttribute('src');
+                chosen.remove();
+                chosen = null;
             }
             if (figure) {
                 figure.classList.remove('is-previewing');
@@ -283,9 +293,8 @@
                 URL.revokeObjectURL(objectUrl);
             }
             objectUrl = URL.createObjectURL(file);
-            if (chosen) {
+            if (previewImage()) {
                 chosen.src = objectUrl;
-                chosen.hidden = false;
             }
             if (figure) {
                 figure.classList.add('is-previewing');

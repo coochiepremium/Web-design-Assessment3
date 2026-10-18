@@ -88,7 +88,7 @@
                 @* The brief's "default image": an image slot you fill with your own picture. *@
                 <image-slot key="@ImageLibrary.UploadPreview" class="image-preview-img image-preview-default" lazy="false" />
             }
-            <img id="image-preview" class="image-preview-img image-preview-chosen" alt="Preview of the image you chose" hidden />
+            @* site.js adds the live preview <img class="image-preview-chosen"> here when a file is chosen. *@
             <figcaption class="image-preview-caption" data-default-caption="@(isEdit ? "Current image" : "Image preview")">
                 @(isEdit ? "Current image" : "Image preview")
             </figcaption>

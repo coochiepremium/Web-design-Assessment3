@@ -15,7 +15,7 @@ app.db
 app.db-shm
 app.db-wal
 
-# Uploaded images are user data; sample images are restored from wwwroot/img/samples at start-up
+# Uploaded images are user data (delete them before zipping the project for submission)
 AICreativeArts/wwwroot/uploads/*
 !AICreativeArts/wwwroot/uploads/.gitkeep
 AICreativeArts/wwwroot/uploads-tests/

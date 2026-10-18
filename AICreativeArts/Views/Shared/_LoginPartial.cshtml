@@ -6,7 +6,8 @@
 {
     <li class="nav-item">
         <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage your account">
-            Hello @User.Identity?.Name!
+            <i class="fa-solid fa-circle-user account-icon" aria-hidden="true"></i>
+            <span class="account-greeting">Hello </span><span class="account-name">@User.Identity?.Name</span><span class="account-greeting">!</span>
             @if (User.IsInRole(AICreativeArts.Authorization.Roles.Admin))
             {
                 <span class="role-badge">Admin</span>

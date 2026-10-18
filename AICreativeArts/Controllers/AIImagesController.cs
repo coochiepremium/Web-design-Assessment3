@@ -43,10 +43,11 @@ public class AIImagesController : Controller
             .ThenByDescending(i => i.UploadDate)
             .ToListAsync();
 
-        var signedIn = User.Identity?.IsAuthenticated == true;
+        var canLike = User.Identity?.IsAuthenticated == true && User.GetLoginId() is not null;
+        var liked = await _likes.LikedImageIdsAsync();
         foreach (var image in images)
         {
-            image.canIncreaseLike = signedIn && !_likes.HasLiked(image.Id);
+            image.canIncreaseLike = canLike && !liked.Contains(image.Id);
         }
 
         return View(images);
@@ -277,24 +278,28 @@ public class AIImagesController : Controller
     [Authorize]
     public async Task<IActionResult> Like(int id)
     {
-        if (_likes.HasLiked(id))
+        switch (await _likes.LikeAsync(id))
         {
-            TempData["SiteMessage"] = "You have already liked this image. Log out and back in to like it again.";
-            return Redirect(Url.ImageAnchor(id));
+            case LikeResult.NotFound:
+                return NotFound();
+            case LikeResult.AlreadyLiked:
+                TempData["SiteMessage"] = "You have already liked this image. Log out and back in to like it again.";
+                break;
+            case LikeResult.LoginExpired:
+                TempData["SiteError"] = "Please log out and log in again before liking images.";
+                break;
         }
 
-        // Increment in a single SQL statement so simultaneous likes are never lost.
-        var updated = await _context.AIImages
-            .Where(i => i.Id == id)
-            .ExecuteUpdateAsync(setters => setters.SetProperty(i => i.Like, i => i.Like + 1));
-        if (updated == 0)
-        {
-            return NotFound();
-        }
-
-        _likes.RecordLike(id);
         return Redirect(Url.ImageAnchor(id));
     }
+
+    // GET: AIImages/Like/5
+    // Reached only when a visitor's login expired before clicking Like: after logging in,
+    // the return URL brings them here, so send them back to the image instead of a 405 page.
+    [HttpGet]
+    [Authorize]
+    [ActionName(nameof(Like))]
+    public IActionResult LikeReturn(int id) => Redirect(Url.ImageAnchor(id));
 
     private static string? Truncate(string? value, int maxLength) =>
         value is { Length: > 0 } && value.Length > maxLength ? value[..maxLength] : value;
