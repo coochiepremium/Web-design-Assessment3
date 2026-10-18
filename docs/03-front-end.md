@@ -524,7 +524,7 @@ This is the same as Create, with Title "Edit AI Image" and `<h1 id="edit-title" 
 
 - **Edit:** `<img class="image-preview-img image-preview-default" src="/uploads/{CurrentFilename}" alt="Current image" data-image-fallback />`.
 - **Create:** `<image-slot key="@ImageLibrary.UploadPreview" class="image-preview-img image-preview-default" lazy="false" />`, the brief's "default image". It shows a placeholder until you add `wwwroot/img/ui/upload-preview.jpg`.
-- `<img id="image-preview" class="image-preview-img image-preview-chosen" alt="Preview of the image you chose" hidden />`, which `site.js` fills when a file is chosen.
+- No preview `<img>` in the markup: when a file is chosen, `site.js` creates `<img class="image-preview-img image-preview-chosen">` inside the figure (so there is never an `<img>` without a `src`).
 - `<figcaption class="image-preview-caption" data-default-caption="Image preview">` ("Current image" on Edit).
 
 Last comes `p.back-link-row` with **Back to List** (`/AIImages`).
@@ -572,7 +572,7 @@ ASP.NET Core Identity ships ready-made pages in the `Microsoft.AspNetCore.Identi
 
 `section.account-page` holds `<h1 class="account-title">Log in</h1>` and a Bootstrap `row g-4`:
 
-- `col-md-5`: `<form id="account" method="post">` with `h2.account-subtitle` "Use a local account to log in.", a `ModelOnly` validation summary (`role="alert"`), and two `form-floating` fields. **Email** has `autocomplete="username"` and **Password** has `autocomplete="current-password"`. Both have `aria-required="true"` and a `placeholder`, which Bootstrap's floating labels need. Then come a `form-check` **Remember me?**, a full-width `btn-lg btn-primary` **Log in** button, and `ul.account-links` with *Forgot your password?*, *Register as a new user* (keeps `returnUrl`) and *Resend email confirmation*.
+- `col-md-5`: `<form id="account" method="post">` with `h2.account-subtitle` "Use a local account to log in.", a `ModelOnly` validation summary (`role="alert"`), and two `form-floating` fields. **Email** has `autocomplete="username"` and **Password** has `autocomplete="current-password"`. Both have `aria-required="true"` and a `placeholder`, which Bootstrap's floating labels need. Then come a `form-check` **Remember me?**, a full-width `btn-lg btn-primary` **Log in** button, and `ul.account-links` with *Register as a new user* (keeps `returnUrl`). The template's *Forgot your password?* and *Resend email confirmation* links were removed, because no email service is configured.
 - `col-md-6 offset-md-1`: `h2.account-subtitle.account-subtitle--accent` "Use another service to log in.". If no external providers are configured (the case here) it shows a note linking to Microsoft's article. Otherwise it shows one button per provider. Last is `div.account-tip`: "Members can upload and like AI images. Administrators can also view details, edit and delete them."
 
 The `Scripts` section adds `_ValidationScriptsPartial`.
@@ -935,8 +935,9 @@ Once the file exists, it renders `<img src="/img/tiles/laion-5b.jpg?v=…" alt="
 
 | Rule | What it does |
 |---|---|
-| `.js .reveal-on-view` | Hidden and lowered (`opacity: 0; transform: translateY(40px) scale(0.98);`) with a 0.9 s transition. The `js` class is added to `<html>` by `site.js`, so **without JavaScript nothing is hidden** |
-| `.js .reveal-on-view.is-visible` | Fully shown (`opacity: 1; transform: none;`) |
+| `.js .reveal-on-view` | Hidden (`opacity: 0`) with a 0.9 s fade. The `js` class is added to `<html>` by `site.js`, so **without JavaScript nothing is hidden** |
+| `.js .reveal-on-view > *` | The block's children start lowered (`transform: translateY(40px) scale(0.98)`). The movement is on the children, not on the observed block itself, so the `IntersectionObserver` measurement never changes and blocks at the screen edge do not flicker |
+| `.js .reveal-on-view.is-visible` (and `> *`) | Fully shown (`opacity: 1; transform: none;`) |
 | `@keyframes glitch` | Red/cyan split text shadow (brand hover) |
 | `@keyframes nudge` | 5 px up-and-down bob (scroll cue) |
 | `@keyframes row-highlight` | Yellow inset border that fades out (linked AI Images row) |
@@ -1058,7 +1059,7 @@ It runs on Create and Edit (it looks for `input[type="file"][data-preview]`) and
 | Variable | Comes from |
 |---|---|
 | `figure` | the element named by `data-preview` (`#image-preview-figure`) |
-| `chosen` | `.image-preview-chosen` inside it (the hidden `<img id="image-preview">`) |
+| `chosen` | The preview `<img class="image-preview-chosen">`, created by `previewImage()` the first time a file is chosen and removed again by `resetPreview()` |
 | `caption`, `defaultCaption` | the `<figcaption>` and its `data-default-caption` |
 | `message` | `[data-valmsg-for="ImageFile"]`, the validation message span |
 | `maxBytes` | `data-max-bytes` (5,242,880), or 5 MB if missing |

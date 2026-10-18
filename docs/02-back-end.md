@@ -44,7 +44,6 @@ Related documents: [../DOCUMENTATION.md](../DOCUMENTATION.md) (overview), [03-fr
 |  7  UseRouting()                             chooses the endpoint (controller action or Razor Page)       |
 |  8  UseAuthentication()                      reads the .AIUnmasked.Auth cookie and sets User              |
 |  9  UseAuthorization()                       enforces [Authorize] / [Authorize(Roles = "Admin")]          |
-| 10  UseSession()                             loads the .AIUnmasked.Session data (the "liked" list)        |
 +-----------------------------------------------------------------------------------------------------------+
    v
  MVC filters (POST uploads):  UploadSizeGuard -> RequestSizeLimit / RequestFormLimits -> antiforgery check
@@ -57,7 +56,7 @@ Related documents: [../DOCUMENTATION.md](../DOCUMENTATION.md) (overview), [03-fr
    v                    v                                      v
  Services            ApplicationDbContext (EF Core)         UserManager / SignInManager / RoleManager
  IImageStorage -> wwwroot/uploads/        |                            |
- ILikeTracker  -> session                 +------> app.db (SQLite) <---+
+ ILikeTracker  -> ImageLikes table        +------> app.db (SQLite) <---+
    v
  View (.cshtml) rendered inside Views/Shared/_Layout.cshtml
    partials, tag helpers (<image-slot>, <background-slot-note>, nav-active), view component (UploadGallery)
@@ -76,7 +75,7 @@ Related documents: [../DOCUMENTATION.md](../DOCUMENTATION.md) (overview), [03-fr
 | `Controllers/` | `HomeController` (public pages and error pages), `AIImagesController` (gallery CRUD and likes) | [5](#5-controllers) |
 | `Data/` | `ApplicationDbContext`, the `InitialCreate` migration, `DbInitializer` | [6](#6-data-dbcontext-migrations-start-up-initialiser-and-database-schema) |
 | `Models/`, `ViewModels/` | `AIImage`, `AIImageRules`, `ErrorViewModel`, `StatusCodeViewModel`, `AIImageFormViewModel` | [7](#7-models-and-view-models) |
-| `Services/` | `ImageStorage` (uploads), `SessionLikeTracker` (one like per login), `MediaLibrary` (image slots) | [8](#8-services) |
+| `Services/` | `ImageStorage` (uploads), `LoginLikeTracker` (one like per login, stored in the database), `MediaLibrary` (image slots) | [8](#8-services) |
 | `Filters/` | `UploadSizeGuardAttribute` (oversized uploads) | [9](#9-filters-uploadsizeguardattribute) |
 | `Infrastructure/` | Strongly typed options classes and URL helper extensions | [10](#10-infrastructure-options-classes-and-url-helpers) |
 | `TagHelpers/`, `ViewComponents/` | `<image-slot>`, `<background-slot-note>`, `nav-active`, the home page upload gallery | [11](#11-tag-helpers-and-the-view-component) |
@@ -123,13 +122,13 @@ Related documents: [../DOCUMENTATION.md](../DOCUMENTATION.md) (overview), [03-fr
 | 4 | `.AddRoles<IdentityRole>()` | Enables roles (`RoleManager`, `User.IsInRole("Admin")`, `[Authorize(Roles = ...)]`) | The Admin role is required by the brief |
 | 5 | `.AddEntityFrameworkStores<ApplicationDbContext>()` | Stores users and roles in the same SQLite database (`AspNet*` tables) | One database file for everything |
 | 6 | `ConfigureApplicationCookie(...)` | Configures the sign-in cookie | See the next table |
-| 7 | `AddDistributedMemoryCache()` + `AddSession(...)` | Adds session state kept in server memory | Holds the list of images a user has liked during the current login |
+| 7 | `Configure<SecurityStampValidatorOptions>(...)` | When Identity rebuilds the sign-in cookie (every 30 minutes) it copies the *login id* claim across | Keeps "one like per login" working for long visits |
 | 8 | `Configure<SiteOptions>`, `Configure<UploadOptions>`, `Configure<SeedAccountOptions>`, `Configure<ImageCreditOptions>` | Binds the `Site`, `Uploads`, `SeedAccounts` and `ImageCredits` sections of `appsettings.json` to C# classes ([section 10](#10-infrastructure-options-classes-and-url-helpers)) | Code then receives typed settings (`IOptions<UploadOptions>`) instead of reading strings |
-| 9 | `AddHttpContextAccessor()` | Lets a service reach the current request | `SessionLikeTracker` needs the current session |
-| 10 | `AddScoped<ILikeTracker, SessionLikeTracker>()` | One like tracker per request | It reads that request's session |
+| 9 | `AddHttpContextAccessor()` | Lets a service reach the current request | `LoginLikeTracker` reads the signed-in user and their login id |
+| 10 | `AddScoped<ILikeTracker, LoginLikeTracker>()` | One like tracker per request | It uses that request's database context and user |
 | 11 | `AddScoped<IImageStorage, ImageStorage>()` | One upload service per request | Used by `AIImagesController` |
 | 12 | `AddSingleton<IMediaLibrary, MediaLibrary>()` | One media library for the whole site | It keeps no per-user state, and it is used on every page (layout, tag helpers) |
-| 13 | `AddControllersWithViews(o => o.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()))` | Adds MVC, plus a **global antiforgery filter** | Every POST, PUT, PATCH and DELETE must carry the hidden `__RequestVerificationToken` that `<form method="post">` tag helpers add automatically. This blocks cross-site request forgery. GET requests are not checked |
+| 13 | `AddControllersWithViews(...)` with `AutoValidateAntiforgeryTokenAttribute` and `IdentityPageGuardFilter` | Adds MVC, plus a **global antiforgery filter** and a guard for the built-in Identity pages (see section 9) | Every POST, PUT, PATCH and DELETE must carry the hidden `__RequestVerificationToken` that `<form method="post">` tag helpers add automatically. This blocks cross-site request forgery. GET requests are not checked |
 | 14 | `AddRazorPages()` | Adds Razor Pages | The Identity pages are Razor Pages |
 
 **Cookie settings** (`ConfigureApplicationCookie`):
@@ -139,12 +138,9 @@ Related documents: [../DOCUMENTATION.md](../DOCUMENTATION.md) (overview), [03-fr
 | `LoginPath` | `/Identity/Account/Login` | Where a visitor is sent when a page needs a signed-in user. `?ReturnUrl=...` is added automatically |
 | `AccessDeniedPath` | `/Identity/Account/AccessDenied` | Where a signed-in member is sent when a page needs the Admin role |
 | `Cookie.Name` | `.AIUnmasked.Auth` | Name of the sign-in cookie |
-| `Events.OnSignedIn` | `ILikeTracker.Reset()` | Clears the "already liked" list when anyone signs in |
-| `Events.OnSigningOut` | `ILikeTracker.Reset()` | Clears it again when they sign out |
+| `Events.OnSigningIn` | `LoginSession.AddLoginId(...)` | Gives every new sign-in a random **login id** claim inside the sign-in cookie |
 
-Together, the two events give the brief's rule: *"max one like per block... The user needs to logoff then login if the user wants to click the Like button again"*.
-
-**Session settings** (`AddSession`): cookie `.AIUnmasked.Session`, `HttpOnly = true` (JavaScript cannot read it), `IsEssential = true` (always set, because the site has no cookie-consent banner), `IdleTimeout = 4 hours`. The data lives in server memory (`AddDistributedMemoryCache`). It is lost when the site restarts, or after 4 idle hours.
+Likes are stored against that login id (`ImageLikes` table), which gives the brief's rule: *"max one like per block... The user needs to logoff then login if the user wants to click the Like button again"*. A new login means a new id, so each image can be liked once more.
 
 ### 2.2 The middleware pipeline, in order, and why that order
 
@@ -161,7 +157,6 @@ Middleware are steps that every request passes through in the order they are add
 | 7 | `app.UseRouting()` | Matches the URL to an endpoint: a controller action (`{controller=Home}/{action=Index}/{id?}`) or a Razor Page | Authorisation needs to know *which* endpoint was chosen, so routing must come before it |
 | 8 | `app.UseAuthentication()` | Reads the `.AIUnmasked.Auth` cookie and fills `HttpContext.User` (name, roles) | It must come before authorisation, which checks who the user is |
 | 9 | `app.UseAuthorization()` | Applies `[Authorize]` attributes on the chosen endpoint. An anonymous user gets a redirect to the login page, and a signed-in user without the role gets a redirect to the access-denied page | It must come **after routing** (to read the endpoint's attributes) and **after authentication** (to know the user). Requests it rejects never reach the controller |
-| 10 | `app.UseSession()` | Loads the session for this request | It must come before the endpoints that use it: `AIImagesController` and the Login and Logout pages, where the cookie events call `Reset()`. Requests rejected by authorisation never load a session |
 | 11 | `app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}")` | Defines MVC URLs, for example `/` → `Home/Index` and `/AIImages/Edit/5` → `AIImagesController.Edit(5)` | This is the standard MVC route |
 | 12 | `app.MapRazorPages()` | Defines `/Identity/Account/...` URLs for the Identity pages | Needed for Login, Register, Logout and the other Identity pages |
 | 13 | `await DbInitializer.InitialiseAsync(app.Services);` | Applies migrations, creates the Admin role and the seed accounts ([6.3](#63-dbinitializercs-preparing-the-database-at-start-up)) | It runs once, before the server accepts requests, so the database is ready on the first page view |
@@ -331,7 +326,7 @@ How a URL `id` is read: the actions that display a page take `int? id`. If the i
 |---|---|
 | URL / method | `GET /AIImages` |
 | Access | `[AllowAnonymous]`: everyone |
-| Does | Loads **all** images ordered by `Like` (highest first), then by `UploadDate` (newest first). For each image it sets `canIncreaseLike = signedIn && !_likes.HasLiked(image.Id)`, which is the per-viewer flag the brief's model includes. Returns `Views/AIImages/Index.cshtml` |
+| Does | Loads **all** images ordered by `Like` (highest first), then by `UploadDate` (newest first). It also loads the ids this login has already liked (`_likes.LikedImageIdsAsync()`), and for each image sets `canIncreaseLike` to true only if the user is signed in and has not liked it yet. This is the per-viewer flag the brief's model includes. Returns `Views/AIImages/Index.cshtml` |
 | View behaviour | Each block is `<article id="image-{id}">`. Signed-in users see a **Like (n)** button (a POST form) or a disabled **Liked (n)** button. Admins also see Edit and Delete, and the image links to Details. Visitors see "n likes" as text |
 
 #### `Details(int? id)`
@@ -426,19 +421,11 @@ Steps:
 
 Steps:
 
-1. If `_likes.HasLiked(id)` is true (already liked during this login), it sets *"You have already liked this image. Log out and back in to like it again."* and redirects to `/AIImages#image-5`. The database is not touched.
-2. Otherwise it runs **one SQL statement**:
+1. It calls `_likes.LikeAsync(id)` (see 8.2), which returns `Liked`, `AlreadyLiked`, `NotFound` or `LoginExpired`.
+2. `NotFound` → the friendly 404 page. `AlreadyLiked` → toast *"You have already liked this image. Log out and back in to like it again."* `LoginExpired` (a sign-in cookie from before login ids existed) → toast asking the user to log in again.
+3. In every other case it redirects to **`/AIImages#image-5`**. The list is re-sorted by likes, and the browser scrolls the liked block to the top of the page, as the brief requires.
 
-   ```csharp
-   var updated = await _context.AIImages
-       .Where(i => i.Id == id)
-       .ExecuteUpdateAsync(setters => setters.SetProperty(i => i.Like, i => i.Like + 1));
-   ```
-
-   This becomes `UPDATE "AIImages" SET "Like" = "Like" + 1 WHERE "Id" = @id`. Because the database adds 1 itself, two people liking at the same moment both count. Reading the number, adding 1 in C# and saving could lose one of the likes.
-3. If `updated == 0`, there is no such image, so `NotFound()` (404 page).
-4. `_likes.RecordLike(id)` remembers the like in the session.
-5. It redirects to **`/AIImages#image-5`**. The list is re-sorted by likes, and `site.js` scrolls the liked block to the top of the page, as the brief requires.
+A matching `GET /AIImages/Like/5` (`LikeReturn`) simply redirects to `/AIImages#image-5`. It is only reached when someone's login expired before clicking Like: after logging in, the return URL brings them back to the image instead of a "405 Method Not Allowed" page.
 
 `Truncate(string?, int)` is a private helper that is used only by `Create(string? prompt)`.
 
@@ -548,7 +535,7 @@ This is the model from the brief, with the same constructor and properties. It a
 | `Like` | | Number of likes |
 | `canIncreaseLike` | **`[NotMapped]`** | See below |
 
-**Why `canIncreaseLike` is `[NotMapped]`:** whether the Like button is active depends on **who is looking**. A visitor can never like, and a member who already liked image 3 during this login cannot like it again, but another member still can. One database column could only hold a single true/false value for everyone. So the value is **calculated on every request** in `AIImagesController.Index` (`signedIn && !_likes.HasLiked(image.Id)`) and never stored. `[NotMapped]` tells EF Core not to create a column for it, and the migration indeed has none. The lower-case name is kept exactly as in the brief.
+**Why `canIncreaseLike` is `[NotMapped]`:** whether the Like button is active depends on **who is looking**. A visitor can never like, and a member who already liked image 3 during this login cannot like it again, but another member still can. One database column could only hold a single true/false value for everyone. So the value is **calculated on every request** in `AIImagesController.Index` (using the likes stored for the current login) and never stored. `[NotMapped]` tells EF Core not to create a column for it, and the migration indeed has none. The lower-case name is kept exactly as in the brief.
 
 `AIImageRules` (same file) holds the limits in one place: `PromptMaxLength = 2000`, `GeneratorMaxLength = 100`, `FilenameMaxLength = 260`. They are used by the model, the `DbContext` and the form view model.
 
@@ -645,17 +632,15 @@ If the file is missing, `Delete` returns `false`. If deleting fails (`IOExceptio
 
 ### 8.2 `Services/LikeTracker.cs`: one like per image per login
 
-Interface `ILikeTracker`: `HasLiked(int imageId)`, `RecordLike(int imageId)`, `Reset()`.
+Interface `ILikeTracker`: `LikedImageIdsAsync()` (the images this login has already liked) and `LikeAsync(int imageId)` (returns a `LikeResult`).
 
-Implementation `SessionLikeTracker`:
+Implementation `LoginLikeTracker`:
 
-- Stores the liked ids as a comma-separated string (for example `3,7,12`) in the **session** under the key `AIUnmasked.LikedImageIds`.
-- `ReadIds()` parses that string into a `HashSet<int>`, ignoring anything that is not a number.
-- `RecordLike` adds the id and writes the string back. `Reset` removes the key.
-- `GetSession()` reads the session through `IHttpContextAccessor` and `ISessionFeature`. It returns `null` instead of throwing when there is no session for the request. Then `HasLiked` is `false`, and `RecordLike` and `Reset` do nothing.
-- `Reset()` is called by the cookie events in `Program.cs` on **every sign-in and sign-out**. Logging off and on again therefore allows one more like per image, exactly as the brief describes.
-
-The session lives in server memory, so restarting the site, or 4 hours of inactivity, also clears the list.
+- At every sign-in, `Authorization/LoginSession.cs` adds a random **login id** claim to the sign-in cookie (the `OnSigningIn` cookie event in `Program.cs`).
+- A like is saved as a row in the **`ImageLikes`** table (`Models/ImageLike.cs`): image id, login id, user id and time. A **unique index on (LoginId, AIImageId)** means the same login can never like the same image twice, even with two clicks at the same moment.
+- `LikeAsync` checks that the image exists and that this login has not liked it. It then inserts the row and, in the same transaction, increases the count with one SQL statement: `UPDATE "AIImages" SET "Like" = "Like" + 1 WHERE "Id" = @id`. The database adds 1 itself, so likes from different people at the same moment are never lost.
+- Logging out and in again creates a new login id, so each image can be liked once more, exactly as the brief describes. The rule survives page reloads and site restarts, because it is stored in the database.
+- Deleting an image also deletes its likes (a cascade delete).
 
 ### 8.3 `Services/MediaLibrary.cs`: which images have been added
 
@@ -844,14 +829,13 @@ URL: `/Identity/Account/AccessDenied`. The cookie handler sends a signed-in memb
 
 ### 14.2 A member clicks Like
 
-1. `GET /AIImages`: `Index()` loads all images sorted by likes. For each one, `canIncreaseLike = signedIn && !HasLiked(id)` uses the session list `AIUnmasked.LikedImageIds`.
+1. `GET /AIImages`: `Index()` loads all images sorted by likes, plus the ids this login has already liked (`LikedImageIdsAsync`). For each image, `canIncreaseLike` is true only if the user is signed in and has not liked it during this login.
 2. The view shows **Like (n)** as a submit button in `<form class="like-form" method="post" action="/AIImages/Like/{id}">` with the antiforgery token. Already-liked images show a disabled **Liked (n)** button.
 3. The member clicks Like, which sends `POST /AIImages/Like/7`. The authorisation middleware (`[Authorize]`) and the antiforgery filter both pass.
-4. `Like(7)`: `HasLiked(7)` is false, so `ExecuteUpdateAsync` runs `UPDATE "AIImages" SET "Like" = "Like" + 1 WHERE "Id" = 7`. One row is updated.
-5. `RecordLike(7)` adds 7 to the session list.
-6. The browser is redirected to `/AIImages#image-7`. The list is re-sorted, the block now shows a disabled **Liked (n + 1)**, and `site.js` scrolls that block to the top of the page.
-7. If the member sends the same POST again (for example from another tab), step 4 is skipped and the toast says *"You have already liked this image. Log out and back in to like it again."*.
-8. When the member logs out (`OnSigningOut`) and in again (`OnSignedIn`), `Reset()` clears the list, so each image can be liked once more.
+4. `LikeAsync(7)` inserts a row in `ImageLikes` for this login id, and adds 1 to the image's `Like` column in the same transaction.
+5. The browser is redirected to `/AIImages#image-7`. The list is re-sorted, the block now shows a disabled **Liked (n + 1)**, and `site.js` scrolls that block to the top of the page.
+6. If the same POST is sent again (for example from another tab), the existing row is found and the toast says *"You have already liked this image. Log out and back in to like it again."*
+7. When the member logs out and in again, the new sign-in gets a new login id, so each image can be liked once more.
 
 ### 14.3 An admin edits and then deletes an image
 
